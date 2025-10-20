@@ -4,8 +4,8 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('v1/auth/', include('users.urls')),    # <- THIS line is crucial!
     path('observations/', include('observations.urls')),
     path('species/', include('species.urls')),
-    path('users/', include('users.urls')),
+    # ... (other includes)
 ]
