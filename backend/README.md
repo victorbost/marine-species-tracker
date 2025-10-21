@@ -5,6 +5,32 @@ This backend uses **Django** with **GeoDjango** and **PostGIS** for geospatial f
 
 ---
 
+## 🛠️ Dependency Management
+
+This backend **now uses [Poetry](https://python-poetry.org/)** instead of `requirements.txt` for all Python package management.
+
+### 🐍 How to install dependencies
+
+- Dependencies are listed in `pyproject.toml` and `poetry.lock`.
+
+- **Install everything (inside the backend container):**
+  ```sh
+  docker-compose run --rm backend poetry install
+  ```
+
+  - This will:
+    - Create a virtual environment (if running locally—not inside Docker).
+    - Install all main, development, and system-packaged dependencies.
+
+- **Add a new runtime dependency:**
+  ```sh
+  docker-compose run --rm backend poetry add <package-name>
+  ```
+
+- **Add a new development dependency:**
+  ```sh
+  docker-compose run --rm backend poetry add --dev <package-name>
+
 ## 🚀 Quick Start
 
 1. **Start all services ([backend, frontend, PostGIS DB]):**
