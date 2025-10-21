@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -12,10 +12,16 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Poetry
+RUN pip install --upgrade pip && pip install poetry
+
+# Use the global environment (not virtualenv, which is best practice for Docker)
+ENV POETRY_VIRTUALENVS_CREATE=false
+
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml poetry.lock README.md ./
+RUN poetry install --no-interaction --no-ansi
 
 COPY . .
 
