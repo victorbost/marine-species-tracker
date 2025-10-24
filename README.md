@@ -33,15 +33,35 @@ This platform bridges citizen science and professional research, making it easy 
 - Docker (optional)
 
 ### Backend Setup
+
+> **All backend development and commands must be run inside Docker containers.**
+
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
+docker-compose up --build        
+# Backend available at http://localhost:8000
 ```
+
+- To install backend dependencies:
+  ```sh
+  docker-compose run --rm backend poetry install
+  ```
+
+- To run Django commands (migrations, shell, tests, etc.):
+  ```sh
+  docker-compose exec backend python manage.py <command>
+  ```
+  Examples:
+  - `docker-compose exec backend python manage.py migrate`
+  - `docker-compose exec backend python manage.py createsuperuser`
+  - `docker-compose exec backend pytest`
+
+- Access the admin: [http://localhost:8000/admin](http://localhost:8000/admin)
+
+- Access the Postgres shell:
+  ```sh
+  docker-compose exec db psql -U postgres -d marine_tracker
+  ```
 
 ### Frontend Setup
 ```bash
