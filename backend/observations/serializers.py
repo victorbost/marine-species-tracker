@@ -6,7 +6,7 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Observation
         geo_field = 'location'
-        fields = ('id', 'species_name', 'observation_datetime', 'location', 'location_name', 'depth', 'temperature', 'visibility', 'notes', 'validated', 'source', 'user')
+        fields = ('id', 'species_name', 'observation_datetime', 'location', 'location_name', 'depth', 'temperature', 'image', 'visibility', 'notes', 'validated', 'source', 'user')
         read_only_fields = ('user', 'source', 'validated')
 
     def update(self, instance, validated_data):
