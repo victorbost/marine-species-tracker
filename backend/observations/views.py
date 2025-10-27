@@ -1,14 +1,18 @@
 from rest_framework import generics, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework_gis.filters import InBBoxFilter
 from rest_framework import status
 from .models import Observation
-from .serializers import ObservationSerializer
+from .serializers import ObservationGeoSerializer
 from .permissions import IsAdminOrResearcher
 
 class ObservationListCreateView(generics.ListCreateAPIView):
-    serializer_class = ObservationSerializer
+    serializer_class = ObservationGeoSerializer
     permission_classes = [permissions.IsAuthenticated]
+    queryset = Observation.objects.all()
+    filter_backends = (InBBoxFilter,)
+    bbox_filter_field = 'location'
 
     def get_queryset(self):
         return Observation.objects.filter(user=self.request.user).order_by('id')
@@ -19,7 +23,7 @@ class ObservationListCreateView(generics.ListCreateAPIView):
 # Detail
 class ObservationDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Observation.objects.all()
-    serializer_class = ObservationSerializer
+    serializer_class = ObservationGeoSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -48,11 +52,11 @@ class ObservationValidateView(APIView):
 
         obs.validated = 'validated'
         obs.save()
-        return Response(ObservationSerializer(obs).data)
+        return Response(ObservationGeoSerializer(obs).data)
 
 # List curated/external (OBIS) only
 class CuratedObservationListView(generics.ListAPIView):
-    serializer_class = ObservationSerializer
+    serializer_class = ObservationGeoSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):

@@ -1,12 +1,12 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.gis.db import models as gis_models
 from core.models import TimeStampedModel
 
 class Observation(TimeStampedModel, models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="observations", null=False, blank=False)
     species_name = models.CharField(max_length=100, null=False, blank=False)
-    latitude = models.FloatField(null=False, blank=False)
-    longitude = models.FloatField(null=False, blank=False)
+    location = gis_models.PointField(geography=True, null=True, blank=True)
     observation_datetime = models.DateTimeField(null=False, blank=False)
     location_name = models.CharField(max_length=255)
     depth = models.FloatField()
