@@ -13,6 +13,18 @@ class Observation(TimeStampedModel, models.Model):
     temperature = models.FloatField()
     visibility = models.FloatField()
     notes = models.TextField(blank=True)
+    VALIDATION_STATUS = [
+        ('pending', 'Pending'),
+        ('validated', 'Validated'),
+        ('rejected', 'Rejected'),
+    ]
+    SOURCE_CHOICES = [
+        ('user', 'User'),
+        ('obis', 'OBIS'),
+        ('other', 'Other External'),
+    ]
+    validated = models.CharField(max_length=10, choices=VALIDATION_STATUS, default='pending')
+    source = models.CharField(max_length=32, choices=SOURCE_CHOICES, default="user")
 
     def __str__(self):
         return f"{self.species_name} by {self.user} on {self.observation_datetime}"
