@@ -53,6 +53,7 @@ This backend **now uses [Poetry](https://python-poetry.org/)** instead of `requi
 
 - **Run migrations:**
     ```sh
+    docker-compose exec backend python manage.py makemigrations
     docker-compose exec backend python manage.py migrate
     ```
 
@@ -101,9 +102,6 @@ This backend **now uses [Poetry](https://python-poetry.org/)** instead of `requi
     DATABASE: marine_tracker
     USER: postgres
     PASSWORD: postgres
-
-## 🛠️ Running Django Commands (always inside Docker)
-
 
 ## 🦺 Troubleshooting
 
