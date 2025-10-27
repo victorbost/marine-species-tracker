@@ -1,10 +1,12 @@
 from rest_framework import serializers
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from .models import Observation
 
-class ObservationSerializer(serializers.ModelSerializer):
+class ObservationGeoSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Observation
-        fields = '__all__'
+        geo_field = 'location'
+        fields = ('id', 'species_name', 'observation_datetime', 'location', 'location_name', 'depth', 'temperature', 'visibility', 'notes', 'validated', 'source', 'user')
         read_only_fields = ('user', 'source', 'validated')
 
     def update(self, instance, validated_data):

@@ -2,6 +2,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.contrib.auth import get_user_model
+from django.contrib.gis.geos import Point
 from observations.models import Observation
 import datetime
 
@@ -39,8 +40,7 @@ class ObservationAPITestCase(APITestCase):
         self.authenticate()
         data = {
             "species_name": "Shark",
-            "latitude": 14.404,
-            "longitude": 52.505,
+            "location": {"type": "Point", "coordinates": [52.505, 14.404]},
             "observation_datetime": "2025-10-21T13:45:00Z",
             "location_name": "Pacific Point",
             "depth": 30,
@@ -60,8 +60,7 @@ class ObservationAPITestCase(APITestCase):
         Observation.objects.create(
             user=self.user,
             species_name="Whale",
-            latitude=1.23,
-            longitude=4.56,
+            location=Point(4.56, 1.23),
             observation_datetime=datetime.datetime.now(datetime.timezone.utc),
             location_name="Deep Bay",
             depth=100,
@@ -71,8 +70,9 @@ class ObservationAPITestCase(APITestCase):
         )
         response = self.client.get(self.observations_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 1)
-        self.assertEqual(response.data['results'][0]['species_name'], "Whale")
+        features = response.data['results']['features']
+        self.assertEqual(len(features), 1)
+        self.assertEqual(features[0]['properties']['species_name'], "Whale")
 
     def test_missing_required_fields_fails(self):
         self.authenticate()
@@ -111,8 +111,7 @@ class ObservationAPITestCase(APITestCase):
         return Observation.objects.create(
             user=user or self.user,
             species_name="Dolphin",
-            latitude=0,
-            longitude=0,
+            location=Point(0, 0),
             observation_datetime=datetime.datetime.now(datetime.timezone.utc),
             location_name="Blue Sea",
             depth=15,
