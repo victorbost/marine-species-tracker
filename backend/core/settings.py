@@ -6,10 +6,19 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-this-in-production')
+# =============================================================================
+# Core Config
+# =============================================================================
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'change-this-for-prod')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
+ENV = os.getenv('ENV', 'development')   # Optionally set ENV=production in prod
+
+# Production domains, set via env in prod
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,backend').split(',')
 
+# =============================================================================
+# Installed Apps
+# =============================================================================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -29,6 +38,9 @@ INSTALLED_APPS = [
     'species',
 ]
 
+# =============================================================================
+# Middleware
+# =============================================================================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -61,6 +73,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+# =============================================================================
+# Database
+# =============================================================================
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
@@ -86,33 +101,72 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# =============================================================================
+# Static/Media
+# =============================================================================
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# REST Framework
+# =============================================================================
+# Django REST Framework
+# =============================================================================
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 25,
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'users.authentication.CookieJWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
 
+# =============================================================================
 # CORS
+# =============================================================================
 CORS_ALLOW_CREDENTIALS = True
+
+# Default dev origins (use env for prod!)
 CORS_ALLOWED_ORIGINS = os.getenv(
     'CORS_ALLOWED_ORIGINS',
     'http://localhost:3000,http://127.0.0.1:3000,http://0.0.0.0'
 ).split(',')
-SESSION_COOKIE_SAMESITE = "Lax"
 
-# AWS S3 (for production)
+# =============================================================================
+# Security Settings — AUTO-SWITCH for DEV vs PROD
+# =============================================================================
+if DEBUG or ENV == "development":
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = "Lax"
+    # Optional: For DRF Swagger etc. in dev, you may want all hosts
+    ALLOWED_HOSTS = ["*"]
+    SECURE_HSTS_SECONDS = 0
+    # CORS/URLs already set for dev above
+else:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = "Lax"  # or 'Strict' if you don't mind stricter cross-subdomain policies
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    # CORS: restrict to your real frontend(s) only
+    CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+    # ALLOWED_HOSTS: restrict to prod domains
+    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+
+# =============================================================================
+# AWS S3 (for prod)
+# =============================================================================
 USE_S3 = os.getenv('USE_S3', 'False') == 'True'
 if USE_S3:
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
@@ -121,5 +175,14 @@ if USE_S3:
     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
+# =============================================================================
 # Silence drf_yasg format deprecation warning:
+# =============================================================================
 SWAGGER_USE_COMPAT_RENDERERS = False
+
+# =============================================================================
+# Optional: Sentry or other error reporting in prod
+# =============================================================================
+# if not DEBUG:
+#     import sentry_sdk
+#     sentry_sdk.init(dsn=os.getenv('SENTRY_DSN'), environment=ENV)
