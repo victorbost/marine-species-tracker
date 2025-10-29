@@ -9,12 +9,16 @@ export async function middleware(request: NextRequest) {
 
   // Proxy the cookie to your backend user check
   const cookieHeader = request.headers.get('cookie') || '';
-  const API_URL = process.env.API_URL;
-  console.log('API_URL:', process.env.API_URL);
-  const res = await fetch(`${API_URL}/api/v1/auth/profiles/me/`, {
-    credentials: "include",
-    headers: { Cookie: cookieHeader },
-  });
+  const API_URL =
+  typeof window === 'undefined'
+    ? process.env.INTERNAL_API_URL // server/middleware/SSR
+    : process.env.NEXT_PUBLIC_API_URL; // client/browser
+
+
+const res = await fetch(`${API_URL}/api/v1/auth/profiles/me/`, {
+  credentials: "include",
+  headers: { Cookie: cookieHeader },
+});
 
   if (res.status !== 200) {
     // Not authenticated: redirect to login

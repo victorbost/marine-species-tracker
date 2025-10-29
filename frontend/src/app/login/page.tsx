@@ -1,4 +1,3 @@
-// src/app/login/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -13,18 +12,19 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    const API_URL = process.env.API_URL;
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
     const res = await fetch(`${API_URL}/api/v1/auth/login/`, {
       method: "POST",
-      credentials: "include", // Crucial for cookie set
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, password }),
-    });
+    }
+  );
 
     if (res.ok) {
-      router.replace("/"); // or wherever your protected homepage lives
+      router.replace("/");
     } else {
       const text = await res.text();
       console.error("Login fail, status:", res.status, "body:", text);

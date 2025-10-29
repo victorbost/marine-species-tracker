@@ -4,18 +4,16 @@ import { useState, useEffect } from "react";
 type User = {
   username: string;
   email: string;
-  // add more fields if needed
 };
 export default function ClientHomeControls() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(process.env.API_URL + "/api/v1/auth/profiles/me/", {
+    fetch(process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/profiles/me/", {
       credentials: "include",
     })
       .then(async (res) => {
-        console.log("me response:", res.status);
         if (res.ok) {
           const data = await res.json();
           setUser(data);
@@ -32,7 +30,7 @@ export default function ClientHomeControls() {
   }, []);
 
   const handleLogout = async () => {
-    await fetch(process.env.API_URL + "/api/v1/auth/logout/", {
+    await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/logout/", {
       method: "POST",
       credentials: "include",
     });

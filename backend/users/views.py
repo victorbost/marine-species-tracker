@@ -48,6 +48,7 @@ class EmailTokenObtainPairView(TokenObtainPairView):
         return response
 
 class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def post(self, request):
         resp = Response({"detail": "Logged out"}, status=200)
         resp.delete_cookie("access_token")
