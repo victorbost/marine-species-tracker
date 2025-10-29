@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from observations.serializers import ObservationGeoSerializer
 
 User = get_user_model()
 
@@ -25,3 +26,13 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ("id", "email", "username", "role", "created_at", "updated_at")
         read_only_fields = ("id", "role", "created_at", "updated_at")
+
+class UserProfileSerializer(UserSerializer):
+    observation_count = serializers.SerializerMethodField()
+    observations = ObservationGeoSerializer(many=True, read_only=True)
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + ("observation_count", "observations")
+
+    def get_observation_count(self, obj):
+        return obj.observations.count()
