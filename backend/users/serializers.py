@@ -1,5 +1,6 @@
-from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from observations.serializers import ObservationGeoSerializer
 
 User = get_user_model()
@@ -36,3 +37,28 @@ class UserProfileSerializer(UserSerializer):
 
     def get_observation_count(self, obj):
         return obj.observations.count()
+
+class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
+    username = None
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove username from fields
+        self.fields.pop('username', None)
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
+
+        if not email or not password:
+            raise serializers.ValidationError("Must include 'email' and 'password'.")
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("No user with this email.")
+
+        attrs["username"] = user.username  # SimpleJWT expects 'username'
+        return super().validate(attrs)
