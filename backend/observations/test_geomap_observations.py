@@ -3,7 +3,7 @@ from rest_framework.test import APIClient
 
 pytestmark = pytest.mark.django_db
 
-OBSERVATION_URL = "/api/observations/"
+OBSERVATION_URL = "/api/v1/observations/"
 
 @pytest.fixture
 def client():
@@ -41,6 +41,7 @@ def make_observation(client, location, notes=""):
         "location": { "type": "Point", "coordinates": location },
     }
     resp = client.post(OBSERVATION_URL, data, format="json")
+    print(resp)
     assert resp.status_code in (200, 201)
     return resp.data
 
@@ -54,6 +55,7 @@ def test_bbox_geo_filter_includes_correct_obs(auth_user):
     make_observation(auth_user, outside, notes="Far Away")
 
     resp = auth_user.get(f"{OBSERVATION_URL}?in_bbox=29,29,32,32")
+    print(resp)
     assert resp.status_code == 200
     geojson = resp.json()["results"]
     assert isinstance(geojson, dict)
@@ -68,6 +70,7 @@ def test_bbox_geo_filter_empty_when_no_match(auth_user):
     """
     make_observation(auth_user, [30.0, 30.0], notes="Only in Asia")
     resp = auth_user.get(f"{OBSERVATION_URL}?in_bbox=0,0,1,1")
+    print(resp)
     assert resp.status_code == 200
     geojson = resp.json()["results"]
     assert geojson["type"] == "FeatureCollection"
