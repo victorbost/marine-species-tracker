@@ -9,10 +9,12 @@ This platform bridges citizen science and professional research, making it easy 
 ## 🏗️ Tech Stack
 
 ### Backend
-- **Framework:** Django + Django REST Framework
-- **Database:** PostgreSQL with PostGIS
-- **Storage:** AWS S3
-- **APIs:** GBIF, OBIS, iNaturalist
+
+- **Django REST API** with a custom user model, JWT cookie authentication, and role support.
+- **Database:** PostgreSQL + PostGIS for geospatial queries.
+- **Media Storage:** Optional AWS S3 integration for scalable file storage.
+- **APIs:** Integrates with GBIF, OBIS, and iNaturalist for external species data.
+- **Security:** All authentication is enforced server-side; Auth uses JWTs stored in HttpOnly cookies (never localStorage) for secure SPA and REST API usage.
 
 ### Frontend
 - **Framework:** Next.js (React) + TypeScript
@@ -30,7 +32,7 @@ This platform bridges citizen science and professional research, making it easy 
 - Python 3.11+
 - Node.js 18+
 - PostgreSQL 14+ with PostGIS
-- Docker (optional)
+- Docker
 
 ### Backend Setup
 
@@ -38,7 +40,7 @@ This platform bridges citizen science and professional research, making it easy 
 
 ```bash
 cd backend
-docker-compose up --build        
+docker-compose up --build
 # Backend available at http://localhost:8000
 ```
 

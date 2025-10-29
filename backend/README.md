@@ -103,6 +103,41 @@ This backend **now uses [Poetry](https://python-poetry.org/)** instead of `requi
     USER: postgres
     PASSWORD: postgres
 
+## 👤 User Authentication & Custom User System
+
+This backend implements a **custom user model** (see `users/` app) with role support and JWT (cookie-based) authentication via Django REST Framework + SimpleJWT.
+
+### Highlights
+- **Custom User Model**: Uses email as the primary identifier, with unique username and role fields. Extend or adjust in `users/models.py`.
+- **Registration, Login, Logout, and Profile**: Complete user management endpoints.
+- **JWT Auth via HttpOnly Cookies**, not localStorage/sessionStorage.
+- **Security**: Production-grade, with SameSite, Secure, and HttpOnly cookie flags set appropriately (see `users/views.py`).
+
+### Key Endpoints
+
+| Endpoint          | Method | Description                    | Requires Auth? |
+|-------------------|--------|--------------------------------|---------------|
+| `/api/v1/auth/register/`      | POST   | User registration              | No  |
+| `/api/v1/auth/login/`         | POST   | User login, sets JWT cookie    | No  |
+| `/api/v1/auth/logout/`        | POST   | Removes JWT cookie (logout)    | Yes |
+| `/api/v1/auth/profiles/me/`   | GET    | Current user's profile         | Yes |
+
+**Login/Logout flow uses JWTs in cookies:**
+- Tokens are validated by custom middleware on every protected API call, including logout.
+- All protected endpoints (`IsAuthenticated`) require the `access_token` cookie.
+
+### Roles & Permissions
+- Custom roles can be added/managed in `users/models.py` for future admin/moderator logic.
+- [Django admin interface](http://localhost:8000/admin) gives you superuser/role management.
+
+### Adding More User Endpoints
+- See `users/views.py` for class-based views. Add new endpoints in `users/urls.py` as needed.
+
+---
+
+For more, see the in-code docstrings in `users/serializers.py`, `users/views.py`, and the OpenAPI docs at `/api/v1/docs/` (Swagger UI).
+
+
 ## 🦺 Troubleshooting
 
 - **Spatial library errors (GDAL/GEOS/PROJ):**
