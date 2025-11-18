@@ -27,4 +27,9 @@ COPY . .
 
 EXPOSE 8000
 
+# Add Celery specific entrypoint for worker and beat services
+COPY docker/celery/worker_entrypoint.sh /usr/local/bin/celery_worker_entrypoint.sh
+COPY docker/celery/beat_entrypoint.sh /usr/local/bin/celery_beat_entrypoint.sh
+RUN chmod +x /usr/local/bin/celery_worker_entrypoint.sh /usr/local/bin/celery_beat_entrypoint.sh
+# CMD for django app remains
 CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]

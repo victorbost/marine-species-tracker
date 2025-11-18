@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from celery.schedules import crontab
+from datetime import timedelta
 
 load_dotenv()
 
@@ -36,6 +38,7 @@ INSTALLED_APPS = [
     'observations',
     'users',
     'species',
+    'django_celery_beat',
 ]
 
 # =============================================================================
@@ -186,3 +189,35 @@ SWAGGER_USE_COMPAT_RENDERERS = False
 # if not DEBUG:
 #     import sentry_sdk
 #     sentry_sdk.init(dsn=os.getenv('SENTRY_DSN'), environment=ENV)
+
+# Celery Configuration
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+CELERY_TASK_TRACK_STARTED = True # Track when tasks start
+
+# Celery Beat settings for periodic tasks
+CELERY_BEAT_SCHEDULE = {
+    'refresh-obis-data-daily': {
+        'task': 'species.tasks.obis_etl.trigger_full_obis_refresh',
+        'schedule': timedelta(days=1), # Run daily, e.g., midnight UTC
+        # Or crontab(hour=3, minute=0), if using django-celery-beat's crontab
+        'args': (
+            "POLYGON((-80 30, -80 50, -30 50, -30 30, -80 30))", # Default geometry for periodic refresh
+            None, # Default taxonid
+            1, # Default number of pages to fetch
+        ),
+        'options': {'queue': 'default'} # Specify queue if you have multiple
+    },
+}
+
+# Custom settings for OBIS/WoRMS clients (used in species.tasks.obis_etl)
+OBIS_API_BASE_URL = os.environ.get('OBIS_API_BASE_URL', "https://api.obis.org/v3/")
+OBIS_API_DEFAULT_SIZE = int(os.environ.get('OBIS_API_DEFAULT_SIZE', 500))
+OBIS_DEFAULT_GEOMETRY = os.environ.get('OBIS_DEFAULT_GEOMETRY', "POLYGON((-180 -90, 180 -90, 180 90, -180 90, -180 -90))")
+OBIS_DEFAULT_FETCH_PAGES = int(os.environ.get('OBIS_DEFAULT_FETCH_PAGES', 1))
+
+WORMS_API_BASE_URL = os.environ.get('WORMS_API_BASE_URL', "https://www.marinespecies.org/rest/")
