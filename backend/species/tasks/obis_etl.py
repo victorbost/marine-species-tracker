@@ -1,6 +1,6 @@
 import logging
 import pytz
-from celery import shared_task
+import time
 from dateutil import parser
 from django.contrib.gis.geos import Point
 from species.models import CuratedObservation
@@ -20,8 +20,7 @@ worms_client = WoRMSAPIClient(
     logger=logger
 )
 
-@shared_task(bind=True, retry_backoff=300, max_retries=5) # Retry after 5 mins, up to 5 times
-def fetch_and_store_obis_data(self, geometry_wkt, taxonid=None, page=0, total_pages=None):
+def fetch_and_store_obis_data(geometry_wkt, taxonid=None, page=0, total_pages=None):
     """
     Celery task to fetch a batch of OBIS data, enrich it, and store in the DB.
     Can be called for specific pages to handle pagination.
@@ -121,16 +120,13 @@ def fetch_and_store_obis_data(self, geometry_wkt, taxonid=None, page=0, total_pa
                 logger.debug(f"Saved new record: {obis_id} - {obs.get('scientificName')}")
             except Exception as e:
                 logger.error(f"Failed to save OBIS record {obis_id}: {e}")
-                self.retry(exc=e) # Celery will retry the task if saving fails
 
         logger.info(f"Finished OBIS ETL for page {page}. Processed {len(obis_records)} records, added {new_records_count} new.")
         return {'status': 'completed', 'records_processed': len(obis_records), 'new_records': new_records_count, 'page': page}
 
     except Exception as e:
         logger.error(f"Unhandled error in fetch_and_store_obis_data for geometry {geometry_wkt}, page {page}: {e}", exc_info=True)
-        self.retry(exc=e) # Celery will retry the task
-
-@shared_task
+        raise
 def trigger_full_obis_refresh(geometry_wkt, taxonid=None, initial_total_pages=1):
     """
     Celery task to trigger a full refresh, possibly fetching multiple pages.
@@ -146,8 +142,8 @@ def trigger_full_obis_refresh(geometry_wkt, taxonid=None, initial_total_pages=1)
     # Example: Just fetch the first few pages
     # Or, if you have a way to get total pages, iterate: range(initial_total_pages)
     for page_num in range(initial_total_pages):
-        fetch_and_store_obis_data.delay(geometry_wkt, taxonid, page_num)
+        fetch_and_store_obis_data(geometry_wkt, taxonid, page_num)
         # Add a small delay between triggering if needed to avoid overwhelming broker or OBIS
-        # time.sleep(0.1)
+        time.sleep(0.1)
 
-    logger.info(f"Finished triggering OBIS refresh tasks.")
+    logger.info("Finished triggering OBIS refresh tasks.")

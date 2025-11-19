@@ -12,12 +12,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes # Ensure data persistence for Redis
-
   backend:
     build: ./backend
     command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
@@ -27,8 +21,6 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/marine_tracker
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
       # OBIS/WoRMS API URLs if different from defaults
       OBIS_API_BASE_URL: https://api.obis.org/v3/
       WORMS_API_BASE_URL: https://www.marinespecies.org/rest/
@@ -36,43 +28,6 @@ services:
       OBIS_DEFAULT_GEOMETRY: "POLYGON((-180 -90, 180 -90, 180 90, -180 90, -180 -90))"
     depends_on:
       - db
-      - redis
-
-  celery-worker:
-    build: ./backend
-    command: /usr/local/bin/celery_worker_entrypoint.sh
-    volumes:
-      - ./backend:/app
-    environment:
-      # Inherit environment variables from the backend service for consistency
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/marine_tracker
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-      OBIS_API_BASE_URL: https://api.obis.org/v3/
-      WORMS_API_BASE_URL: https://www.marinespecies.org/rest/
-      OBIS_DEFAULT_GEOMETRY: "POLYGON((-180 -90, 180 -90, 180 90, -180 90, -180 -90))"
-    depends_on:
-      - db
-      - redis
-      - backend # Ensure backend DB migrations are run before worker attempts to access models
-
-  celery-beat:
-    build: ./backend
-    command: /usr/local/bin/celery_beat_entrypoint.sh
-    volumes:
-      - ./backend:/app
-    environment:
-      # Inherit environment variables
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/marine_tracker
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-      OBIS_API_BASE_URL: https://api.obis.org/v3/
-      WORMS_API_BASE_URL: https://www.marinespecies.org/rest/
-      OBIS_DEFAULT_GEOMETRY: "POLYGON((-180 -90, 180 -90, 180 90, -180 90, -180 -90))"
-    depends_on:
-      - db
-      - redis
-      - backend # Ensure backend DB migrations are run before beat attempts to access models
 
   frontend:
     build: ./frontend
@@ -90,6 +45,4 @@ services:
 
 volumes:
   postgres_data:
-    driver: local
-  redis_data:
     driver: local

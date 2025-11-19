@@ -1,29 +1,60 @@
 from django.contrib import admin
-# from django.contrib.gis.admin import OSMGeoAdmin # Comment this out
+# No need to import OSMGeoAdmin if you're not using it
 from .models import CuratedObservation
 
-# @admin.register(CuratedObservation) # Comment this out
+@admin.register(CuratedObservation)
 class CuratedObservationAdmin(admin.ModelAdmin): # Use standard ModelAdmin
     list_display = (
+        'id', # Primary key ID
         'species_name',
         'common_name',
+        'obis_id',
         'observation_date',
+        'observation_datetime',
+        'location', # This will display as text (e.g., POINT (X Y))
         'location_name',
+        'machine_observation',
+        'validated',
+        'source',
+        'depth',
+        'temperature',
+        'visibility',
+        'notes',
+        'image',
+        'user',
+    )
+    list_filter = (
         'source',
         'validated',
-        'obis_id'
-    )
-    list_filter = ('source', 'validated', 'observation_date', 'machine_observation')
-    search_fields = ('species_name', 'common_name', 'location_name', 'notes', 'obis_id')
-    readonly_fields = (
-        'obis_id',
-        'raw_data',
-        'observation_datetime',
         'observation_date',
-        'location',
         'machine_observation',
-        'source',
-        'user',
-        'image'
+        'common_name',
+        'species_name',
     )
-admin.site.register(CuratedObservation, CuratedObservationAdmin) # Register manually
+    search_fields = (
+        'species_name',
+        'common_name',
+        'location_name',
+        'notes',
+        'obis_id',
+    )
+    readonly_fields = (
+        'id',
+        'species_name',
+        'common_name',
+        'obis_id',
+        'observation_date',
+        'observation_datetime',
+        'location',
+        'location_name',
+        'machine_observation',
+        'validated',
+        'source',
+        'depth',
+        'temperature',
+        'visibility',
+        'notes',
+        'image',
+        'user',
+        'raw_data',
+    )
