@@ -13,13 +13,15 @@ class OBISAPIClient:
         logging.basicConfig(level=logging.INFO)
         return logging.getLogger(__name__)
 
-    def fetch_occurrences(self, geometry, taxonid=None, size=None, page=0):
+    def fetch_occurrences(self, geometry, taxonid=None, size=None, page=0, start_date=None, end_date=None):
         """
         Fetches occurrence data from OBIS API.
         :param geometry: WKT polygon string e.g., "POLYGON((-80 30, -80 50, -30 50, -30 30, -80 30))"
         :param taxonid: OBIS taxon ID (optional)
         :param size: Number of results per page (max 500)
         :param page: Page number (for pagination)
+        :param start_date: Date string (YYYY-MM-DD) to fetch records with eventDate >= this.
+        :param end_date: Date string (YYYY-MM-DD) to fetch records with eventDate <= this.
         :return: List of occurrence records
         """
         endpoint = f"{self.base_url}occurrence"
@@ -30,11 +32,15 @@ class OBISAPIClient:
         }
         if taxonid:
             params["taxonid"] = taxonid
+        if start_date: # Add this condition
+            params["startdate"] = start_date
+        if end_date: # Add this condition
+            params["enddate"] = end_date
 
         self.logger.info(f"Fetching OBIS data from {endpoint} with params: {params}")
         try:
             response = requests.get(endpoint, params=params, timeout=30)
-            response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+            response.raise_for_status()
             data = response.json()
             return data.get("results", [])
         except requests.exceptions.RequestException as e:
@@ -43,5 +49,3 @@ class OBISAPIClient:
         except json.JSONDecodeError:
             self.logger.error("Failed to decode JSON response from OBIS API.")
             return []
-
-    # Add more methods for other OBIS endpoints if needed

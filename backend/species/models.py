@@ -9,7 +9,7 @@ class CuratedObservation(models.Model):
     # Observation detail
     observation_date = models.DateField(blank=True, null=True)
     observation_datetime = models.DateTimeField(blank=True, null=True)
-    location = models.PointField()  # PostGIS geometry field
+    location = models.PointField(geography=True, null=True, blank=True)
     location_name = models.CharField(max_length=512, blank=True, null=True)
     machine_observation = models.CharField(max_length=128, blank=True, null=True)
     validated = models.CharField(max_length=128, blank=True, null=True)
