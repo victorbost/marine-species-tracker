@@ -14,13 +14,18 @@ services:
 
   backend:
     build: ./backend
-    command: python manage.py runserver 0.0.0.0:8000
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - ./backend:/app
     ports:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/marine_tracker
+      # OBIS/WoRMS API URLs if different from defaults
+      OBIS_API_BASE_URL: https://api.obis.org/v3/
+      WORMS_API_BASE_URL: https://www.marinespecies.org/rest/
+      # Default geometry for scheduled tasks if not overridden in settings.py
+      OBIS_DEFAULT_GEOMETRY: "POLYGON((-180 -90, 180 -90, 180 90, -180 90, -180 -90))"
     depends_on:
       - db
 
@@ -40,3 +45,4 @@ services:
 
 volumes:
   postgres_data:
+    driver: local

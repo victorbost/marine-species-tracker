@@ -186,3 +186,11 @@ SWAGGER_USE_COMPAT_RENDERERS = False
 # if not DEBUG:
 #     import sentry_sdk
 #     sentry_sdk.init(dsn=os.getenv('SENTRY_DSN'), environment=ENV)
+
+# Custom settings for OBIS/WoRMS clients (used in species.tasks.obis_etl)
+OBIS_API_BASE_URL = os.environ.get('OBIS_API_BASE_URL', "https://api.obis.org/v3/")
+OBIS_API_DEFAULT_SIZE = int(os.environ.get('OBIS_API_DEFAULT_SIZE', 500))
+OBIS_DEFAULT_GEOMETRY = os.environ.get('OBIS_DEFAULT_GEOMETRY', "POLYGON((-180 -90, 180 -90, 180 90, -180 90, -180 -90))")
+OBIS_DEFAULT_FETCH_PAGES = int(os.environ.get('OBIS_DEFAULT_FETCH_PAGES', 1))
+
+WORMS_API_BASE_URL = os.environ.get('WORMS_API_BASE_URL', "https://www.marinespecies.org/rest/")
