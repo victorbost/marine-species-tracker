@@ -28,14 +28,12 @@ class WoRMSAPIClient:
             response.raise_for_status()
             data = response.json()
             if data:
-                # Prefer preferred name, then first English, then first record
-                preferred = next((d for d in data if d.get("isPreferredName") == 1), None)
-                if preferred:
-                    return preferred.get("vernacular")
-                english = next((d for d in data if d.get("language") == 'English'), None)
-                if english:
-                    return english.get("vernacular")
-                return data[0].get("vernacular")
+                # Only return English common names
+                english_names = [d.get("vernacular") for d in data if d.get("language") == 'English' and d.get("vernacular")]
+                if english_names:
+                    # Prioritize preferred English name, otherwise take the first available English name
+                    preferred_english = next((d.get("vernacular") for d in data if d.get("language") == 'English' and d.get("isPreferredName") == 1 and d.get("vernacular")), None)
+                    return preferred_english if preferred_english else english_names[0]
             return None
         except requests.exceptions.RequestException as e:
             self.logger.warning(f"WoRMS API request failed for AphiaID {aphia_id}: {e}")
