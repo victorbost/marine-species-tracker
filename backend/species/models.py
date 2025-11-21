@@ -16,7 +16,9 @@ class CuratedObservation(models.Model):
     source = models.CharField(max_length=50, default="OBIS")
 
     # Scientific/Environmental info
-    depth = models.FloatField(blank=True, null=True)
+    depth_min = models.FloatField(blank=True, null=True)
+    depth_max = models.FloatField(blank=True, null=True)
+    bathymetry = models.FloatField(blank=True, null=True)
     temperature = models.FloatField(blank=True, null=True)
     visibility = models.FloatField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
@@ -26,6 +28,14 @@ class CuratedObservation(models.Model):
 
     # Extra data for user/ownership (if relevant in the future)
     user = models.CharField(max_length=255, blank=True, null=True)
+
+    # New 'sex' field
+    SEX_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('unknown', 'Unknown'),
+    ]
+    sex = models.CharField(max_length=10, choices=SEX_CHOICES, default='unknown', blank=True, null=True)
 
     # Raw API data
     raw_data = models.JSONField(blank=True, null=True)
