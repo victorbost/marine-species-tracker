@@ -8,33 +8,44 @@ import datetime
 
 User = get_user_model()
 
+
 class ObservationAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            email='user@test.com', username='usertest', password='StrongPassword123'
+            email="user@test.com",
+            username="usertest",
+            password="StrongPassword123",
         )
-        self.login_url = reverse('token_obtain_pair')
-        self.observations_url = reverse('user-observations')
+        self.login_url = reverse("token_obtain_pair")
+        self.observations_url = reverse("user-observations")
 
     def authenticate(self):
         response = self.client.post(
             self.login_url,
             {
-                'email': 'user@test.com',
-                'username': 'usertest',
-                'password': 'StrongPassword123'
+                "email": "user@test.com",
+                "username": "usertest",
+                "password": "StrongPassword123",
             },
-            format='json'
+            format="json",
         )
-        token = response.data.get('access')
-        assert token is not None, f"Login failed or no token. Response data: {response.data}"
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        token = response.data.get("access")
+        assert (
+            token is not None
+        ), f"Login failed or no token. Response data: {response.data}"
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
 
     def test_auth_required_for_observation_list_create(self):
         response = self.client.get(self.observations_url)
-        self.assertIn(response.status_code, [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN])
+        self.assertIn(
+            response.status_code,
+            [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN],
+        )
         response = self.client.post(self.observations_url, {})
-        self.assertIn(response.status_code, [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN])
+        self.assertIn(
+            response.status_code,
+            [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN],
+        )
 
     def test_create_observation(self):
         self.authenticate()
@@ -46,9 +57,9 @@ class ObservationAPITestCase(APITestCase):
             "depth": 30,
             "temperature": 20.5,
             "visibility": 10,
-            "notes": "Saw dorsal fin."
+            "notes": "Saw dorsal fin.",
         }
-        response = self.client.post(self.observations_url, data, format='json')
+        response = self.client.post(self.observations_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Observation.objects.count(), 1)
         obs = Observation.objects.get()
@@ -66,21 +77,23 @@ class ObservationAPITestCase(APITestCase):
             depth=100,
             temperature=3.5,
             visibility=25,
-            notes="Big splash"
+            notes="Big splash",
         )
         response = self.client.get(self.observations_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        features = response.data['results']['features']
+        features = response.data["results"]["features"]
         self.assertEqual(len(features), 1)
-        self.assertEqual(features[0]['properties']['species_name'], "Whale")
+        self.assertEqual(features[0]["properties"]["species_name"], "Whale")
 
     def test_missing_required_fields_fails(self):
         self.authenticate()
-        data = { "species_name": "", "latitude": "", "longitude": "" }
-        response = self.client.post(self.observations_url, data, format='json')
+        data = {"species_name": "", "latitude": "", "longitude": ""}
+        response = self.client.post(self.observations_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def create_user_with_role(self, email, username, password, role=None, is_staff=False):
+    def create_user_with_role(
+        self, email, username, password, role=None, is_staff=False
+    ):
         user = User.objects.create_user(
             email=email,
             username=username,
@@ -97,15 +110,17 @@ class ObservationAPITestCase(APITestCase):
         response = self.client.post(
             self.login_url,
             {
-                'email': user.email,
-                'username': user.username,
-                'password': 'StrongPassword123',
+                "email": user.email,
+                "username": user.username,
+                "password": "StrongPassword123",
             },
-            format='json'
+            format="json",
         )
-        token = response.data.get('access')
-        assert token is not None, f"Login failed or no token. Response data: {response.data}"
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        token = response.data.get("access")
+        assert (
+            token is not None
+        ), f"Login failed or no token. Response data: {response.data}"
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
 
     def make_observation(self, user=None):
         return Observation.objects.create(
@@ -123,7 +138,7 @@ class ObservationAPITestCase(APITestCase):
     def test_hobbyist_cannot_validate_observation(self):
         self.authenticate()
         obs = self.make_observation(self.user)
-        url = reverse('observation-validate', kwargs={'pk': obs.pk})
+        url = reverse("observation-validate", kwargs={"pk": obs.pk})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 403)
         obs.refresh_from_db()
@@ -131,14 +146,14 @@ class ObservationAPITestCase(APITestCase):
 
     def test_admin_can_validate_observation(self):
         admin_user = self.create_user_with_role(
-            email='admin@test.com',
-            username='admintest',
-            password='StrongPassword123',
-            is_staff=True
+            email="admin@test.com",
+            username="admintest",
+            password="StrongPassword123",
+            is_staff=True,
         )
         obs = self.make_observation(admin_user)
         self.authenticate_as(admin_user)
-        url = reverse('observation-validate', kwargs={'pk': obs.pk})
+        url = reverse("observation-validate", kwargs={"pk": obs.pk})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 200)
         obs.refresh_from_db()
@@ -146,14 +161,14 @@ class ObservationAPITestCase(APITestCase):
 
     def test_researcher_can_validate_observation(self):
         researcher_user = self.create_user_with_role(
-            email='researcher@test.com',
-            username='researchertest',
-            password='StrongPassword123',
-            role='researcher'
+            email="researcher@test.com",
+            username="researchertest",
+            password="StrongPassword123",
+            role="researcher",
         )
         obs = self.make_observation(researcher_user)
         self.authenticate_as(researcher_user)
-        url = reverse('observation-validate', kwargs={'pk': obs.pk})
+        url = reverse("observation-validate", kwargs={"pk": obs.pk})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 200)
         obs.refresh_from_db()
@@ -161,12 +176,12 @@ class ObservationAPITestCase(APITestCase):
 
     def test_validate_nonexistent_observation_returns_404(self):
         admin_user = self.create_user_with_role(
-            email='admin2@test.com',
-            username='admintest2',
-            password='StrongPassword123',
-            is_staff=True
+            email="admin2@test.com",
+            username="admintest2",
+            password="StrongPassword123",
+            is_staff=True,
         )
         self.authenticate_as(admin_user)
-        url = reverse('observation-validate', kwargs={'pk': 9999})
+        url = reverse("observation-validate", kwargs={"pk": 9999})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 404)

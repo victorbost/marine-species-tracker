@@ -5,6 +5,7 @@ from dateutil import parser
 
 logger = logging.getLogger(__name__)
 
+
 def clean_string_to_capital_capital(input_string):
     """
     Cleans a string to "Capital Capital" format.
@@ -25,30 +26,32 @@ def clean_string_to_capital_capital(input_string):
     s = str(input_string)
 
     # 1. Replace underscores/hyphens with spaces
-    s = s.replace('_', ' ').replace('-', ' ')
+    s = s.replace("_", " ").replace("-", " ")
 
     # 2. Add spaces before uppercase letters that follow a lowercase letter
     # This handles "humanObservation" -> "human Observation"
     # and "MachineObservation" -> "Machine Observation"
-    s = re.sub(r'([a-z])([A-Z])', r'\1 \2', s)
+    s = re.sub(r"([a-z])([A-Z])", r"\1 \2", s)
 
     # 3. Add spaces before uppercase letters that follow a sequence of uppercase letters
     # This handles "MATERIALSAMPLE" -> "MATERIAL SAMPLE" or "NASAProject" -> "NASA Project"
-    s = re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1 \2', s)
+    s = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1 \2", s)
 
     # 4. Add spaces between a common short word and a longer word that follows
-    s = re.sub(r'(human)(observation)', r'\1 \2', s, flags=re.IGNORECASE)
-    s = re.sub(r'(machine)(observation)', r'\1 \2', s, flags=re.IGNORECASE)
-    s = re.sub(r'(material)(sample)', r'\1 \2', s, flags=re.IGNORECASE)
-
+    s = re.sub(r"(human)(observation)", r"\1 \2", s, flags=re.IGNORECASE)
+    s = re.sub(r"(machine)(observation)", r"\1 \2", s, flags=re.IGNORECASE)
+    s = re.sub(r"(material)(sample)", r"\1 \2", s, flags=re.IGNORECASE)
 
     # 5. Remove any leading/trailing spaces and multiple internal spaces
-    s = re.sub(r'\s+', ' ', s).strip()
+    s = re.sub(r"\s+", " ", s).strip()
 
     # 6. Capitalize the first letter of each word (title case)
-    cleaned_string = ' '.join([word.capitalize() for word in s.lower().split()])
+    cleaned_string = " ".join(
+        [word.capitalize() for word in s.lower().split()]
+    )
 
     return cleaned_string if cleaned_string else None
+
 
 def to_float(value):
     """Safely converts a value to float, returns None if conversion fails."""
@@ -73,7 +76,6 @@ def normalize_obis_depth(obs: dict):
     raw_max = obs.get("maximumDepthInMeters")
     raw_bathy = obs.get("bathymetry")
 
-
     depth = to_float(raw_depth)
     depth_min = to_float(raw_min)
     depth_max = to_float(raw_max)
@@ -89,8 +91,8 @@ def normalize_obis_depth(obs: dict):
     if depth_max is not None and depth_min is None:
         depth_min = depth_max
 
-
     return depth_min, depth_max, bathymetry
+
 
 def get_harmonized_common_name(obis_record, worms_client):
     """
@@ -106,9 +108,12 @@ def get_harmonized_common_name(obis_record, worms_client):
         # If OBIS vernacularName is not available, use WoRMS API
         aphia_id = obis_record.get("aphiaID")
         if aphia_id:
-            worms_common_name = worms_client.get_common_name_by_aphia_id(aphia_id)
+            worms_common_name = worms_client.get_common_name_by_aphia_id(
+                aphia_id
+            )
             return clean_string_to_capital_capital(worms_common_name)
     return None
+
 
 def parse_obis_event_date(obis_id: str, event_date_str: str):
     """
@@ -122,7 +127,10 @@ def parse_obis_event_date(obis_id: str, event_date_str: str):
     observation_date = None
 
     if not event_date_str:
-        logger.debug(f"OBIS record {obis_id} has no 'eventDate' string. Date/time fields will be None.")
+        logger.debug(
+            f"OBIS record {obis_id} has no 'eventDate' string. Date/time"
+            " fields will be None."
+        )
         return None, None
 
     try:
@@ -135,28 +143,36 @@ def parse_obis_event_date(obis_id: str, event_date_str: str):
     except ValueError as ve:
         if "offset must be a timedelta" in str(ve):
             logger.warning(
-                f"OBIS record {obis_id}: 'eventDate' '{event_date_str}' has extreme timezone offset. "
-                "Date/time fields set to None for this record. Error: {ve}"
+                f"OBIS record {obis_id}: 'eventDate' '{event_date_str}' has"
+                " extreme timezone offset. Date/time fields set to None for"
+                " this record. Error: {ve}"
             )
         else:
-            logger.warning(f"OBIS record {obis_id}: 'eventDate' '{event_date_str}' could not be parsed. "
-                           "Date/time fields set to None for this record. Error: {ve}")
+            logger.warning(
+                f"OBIS record {obis_id}: 'eventDate' '{event_date_str}' could"
+                " not be parsed. Date/time fields set to None for this"
+                " record. Error: {ve}"
+            )
     except Exception as e:
-        logger.warning(f"OBIS record {obis_id}: Unexpected error parsing 'eventDate' '{event_date_str}'. "
-                       "Date/time fields set to None for this record. Error: {e}")
+        logger.warning(
+            f"OBIS record {obis_id}: Unexpected error parsing 'eventDate'"
+            f" '{event_date_str}'. Date/time fields set to None for this"
+            " record. Error: {e}"
+        )
 
     return observation_datetime, observation_date
+
 
 def standardize_sex(sex_value):
     """
     Standardizes the sex value to 'male', 'female', or 'unknown'.
     """
     if not sex_value:
-        return 'unknown'
+        return "unknown"
     sex_value = str(sex_value).strip().lower()
-    if sex_value in ['male', 'm']:
-        return 'male'
-    elif sex_value in ['female', 'f']:
-        return 'female'
+    if sex_value in ["male", "m"]:
+        return "male"
+    elif sex_value in ["female", "f"]:
+        return "female"
     else:
-        return 'unknown'
+        return "unknown"

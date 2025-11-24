@@ -5,7 +5,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("species", "0003_rename_depth_curatedobservation_bathymetry_and_more"),
+        (
+            "species",
+            "0003_rename_depth_curatedobservation_bathymetry_and_more",
+        ),
     ]
 
     operations = [

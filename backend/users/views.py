@@ -8,12 +8,15 @@ from .serializers import (
     UserSerializer,
     RegisterSerializer,
     UserProfileSerializer,
-    EmailTokenObtainPairSerializer
+    EmailTokenObtainPairSerializer,
 )
+
+
 class RegisterView(generics.CreateAPIView):
     queryset = get_user_model().objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
+
 
 class UserDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
@@ -22,12 +25,14 @@ class UserDetailView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+
 class ProfileMeView(generics.RetrieveAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         return self.request.user
+
 
 class EmailTokenObtainPairView(TokenObtainPairView):
     serializer_class = EmailTokenObtainPairSerializer
@@ -42,13 +47,15 @@ class EmailTokenObtainPairView(TokenObtainPairView):
                 httponly=True,
                 secure=not settings.DEBUG,
                 samesite="Lax",
-                max_age=24*60*60,
-                path="/"
+                max_age=24 * 60 * 60,
+                path="/",
             )
         return response
 
+
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
         resp = Response({"detail": "Logged out"}, status=200)
         resp.delete_cookie("access_token")

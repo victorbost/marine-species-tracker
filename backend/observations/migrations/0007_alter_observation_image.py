@@ -16,7 +16,10 @@ class Migration(migrations.Migration):
             name="image",
             field=models.ImageField(
                 blank=True,
-                help_text="Optional picture of the observed species (max 2MB, resized to 512x512px).",
+                help_text=(
+                    "Optional picture of the observed species (max 2MB,"
+                    " resized to 512x512px)."
+                ),
                 null=True,
                 upload_to="observation_pics/",
                 validators=[

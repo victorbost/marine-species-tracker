@@ -2,18 +2,33 @@ import requests
 import json
 from time import sleep
 
+
 class OBISAPIClient:
-    def __init__(self, base_url="https://api.obis.org/v3/", default_size=100, logger=None):
+    def __init__(
+        self,
+        base_url="https://api.obis.org/v3/",
+        default_size=100,
+        logger=None,
+    ):
         self.base_url = base_url
         self.default_size = default_size
         self.logger = logger or self._get_default_logger()
 
     def _get_default_logger(self):
         import logging
+
         logging.basicConfig(level=logging.INFO)
         return logging.getLogger(__name__)
 
-    def fetch_occurrences(self, geometry, taxonid=None, size=None, page=0, start_date=None, end_date=None):
+    def fetch_occurrences(
+        self,
+        geometry,
+        taxonid=None,
+        size=None,
+        page=0,
+        start_date=None,
+        end_date=None,
+    ):
         """
         Fetches occurrence data from OBIS API.
         :param geometry: WKT polygon string e.g., "POLYGON((-80 30, -80 50, -30 50, -30 30, -80 30))"
@@ -28,16 +43,18 @@ class OBISAPIClient:
         params = {
             "geometry": geometry,
             "size": size or self.default_size,
-            "offset": page * (size or self.default_size)
+            "offset": page * (size or self.default_size),
         }
         if taxonid:
             params["taxonid"] = taxonid
-        if start_date: # Add this condition
+        if start_date:  # Add this condition
             params["startdate"] = start_date
-        if end_date: # Add this condition
+        if end_date:  # Add this condition
             params["enddate"] = end_date
 
-        self.logger.info(f"Fetching OBIS data from {endpoint} with params: {params}")
+        self.logger.info(
+            f"Fetching OBIS data from {endpoint} with params: {params}"
+        )
         try:
             response = requests.get(endpoint, params=params, timeout=30)
             response.raise_for_status()

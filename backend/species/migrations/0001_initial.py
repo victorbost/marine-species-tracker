@@ -29,8 +29,14 @@ class Migration(migrations.Migration):
                 ),
                 ("obis_id", models.CharField(max_length=100, unique=True)),
                 ("observation_date", models.DateField(blank=True, null=True)),
-                ("observation_datetime", models.DateTimeField(blank=True, null=True)),
-                ("location", django.contrib.gis.db.models.fields.PointField(srid=4326)),
+                (
+                    "observation_datetime",
+                    models.DateTimeField(blank=True, null=True),
+                ),
+                (
+                    "location",
+                    django.contrib.gis.db.models.fields.PointField(srid=4326),
+                ),
                 (
                     "location_name",
                     models.CharField(blank=True, max_length=512, null=True),
@@ -39,14 +45,20 @@ class Migration(migrations.Migration):
                     "machine_observation",
                     models.CharField(blank=True, max_length=128, null=True),
                 ),
-                ("validated", models.CharField(blank=True, max_length=128, null=True)),
+                (
+                    "validated",
+                    models.CharField(blank=True, max_length=128, null=True),
+                ),
                 ("source", models.CharField(default="OBIS", max_length=50)),
                 ("depth", models.FloatField(blank=True, null=True)),
                 ("temperature", models.FloatField(blank=True, null=True)),
                 ("visibility", models.FloatField(blank=True, null=True)),
                 ("notes", models.TextField(blank=True, null=True)),
                 ("image", models.URLField(blank=True, null=True)),
-                ("user", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "user",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
                 ("raw_data", models.JSONField(blank=True, null=True)),
             ],
             options={

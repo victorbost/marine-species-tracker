@@ -5,29 +5,40 @@ pytestmark = pytest.mark.django_db
 
 MAP_OBS_URL = "/api/v1/map/observations/"
 
+
 @pytest.fixture
 def client():
     return APIClient()
 
+
 @pytest.fixture
 def auth_user(client):
-    reg_resp = client.post("/api/v1/auth/register/", {
-        "email": "geomap2@example.com",
-        "username": "geomapper2",
-        "password": "GeoMap$123",
-        "role": "hobbyist"
-    }, format="json")
+    reg_resp = client.post(
+        "/api/v1/auth/register/",
+        {
+            "email": "geomap2@example.com",
+            "username": "geomapper2",
+            "password": "GeoMap$123",
+            "role": "hobbyist",
+        },
+        format="json",
+    )
     assert reg_resp.status_code in (200, 201)
-    token_resp = client.post("/api/v1/auth/login/", {
-        "email": "geomap2@example.com",
-        "username": "geomapper2",
-        "password": "GeoMap$123",
-        "role": "hobbyist"
-    }, format="json")
+    token_resp = client.post(
+        "/api/v1/auth/login/",
+        {
+            "email": "geomap2@example.com",
+            "username": "geomapper2",
+            "password": "GeoMap$123",
+            "role": "hobbyist",
+        },
+        format="json",
+    )
     assert token_resp.status_code == 200
     token = token_resp.data["access"]
     client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
     return client
+
 
 def make_observation(client, coords, notes=""):
     obs_url = "/api/v1/observations/"
@@ -39,18 +50,19 @@ def make_observation(client, coords, notes=""):
         "temperature": 18.5,
         "visibility": 12,
         "notes": notes,
-        "location": { "type": "Point", "coordinates": coords },
+        "location": {"type": "Point", "coordinates": coords},
     }
     resp = client.post(obs_url, data, format="json")
     assert resp.status_code in (200, 201)
     return resp.data
 
+
 def test_map_query_returns_observation_in_circle(auth_user):
     """
     Observation within circle should be included, outside should not.
     """
-    paris_coords = [2.35, 48.85] # Paris
-    london_coords = [-0.13, 51.51] # London
+    paris_coords = [2.35, 48.85]  # Paris
+    london_coords = [-0.13, 51.51]  # London
     make_observation(auth_user, paris_coords, notes="Paris")
     make_observation(auth_user, london_coords, notes="London")
 
@@ -61,6 +73,7 @@ def test_map_query_returns_observation_in_circle(auth_user):
     notes = [f["properties"]["notes"] for f in features]
     assert "Paris" in notes
     assert "London" not in notes
+
 
 def test_map_query_returns_both_in_larger_radius(auth_user):
     """
@@ -79,12 +92,14 @@ def test_map_query_returns_both_in_larger_radius(auth_user):
     assert "Paris" in notes
     assert "London" in notes
 
+
 def test_map_query_with_invalid_params(auth_user):
     """
     Invalid lat/lng should return 400 error.
     """
     resp = auth_user.get(f"{MAP_OBS_URL}?lat=notanumber&lng=2.35&radius=50")
     assert resp.status_code == 400
+
 
 def test_map_query_empty_if_no_matches(auth_user):
     """
@@ -97,6 +112,7 @@ def test_map_query_empty_if_no_matches(auth_user):
     assert resp.status_code == 200
     features = resp.json()["features"]
     assert features == []
+
 
 def test_map_query_no_params_returns_all(auth_user):
     """

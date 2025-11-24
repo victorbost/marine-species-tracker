@@ -41,3 +41,9 @@ django-debug-toolbar = "4.2.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+preview = true
+line-length = 79
+enable-unstable-feature = ["string_processing"]
+target-version = ["py310", "py311", "py312", "py313"]

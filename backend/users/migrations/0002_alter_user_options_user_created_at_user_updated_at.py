@@ -20,7 +20,14 @@ class Migration(migrations.Migration):
             field=models.DateTimeField(
                 auto_now_add=True,
                 default=datetime.datetime(
-                    2025, 10, 27, 7, 50, 55, 212050, tzinfo=datetime.timezone.utc
+                    2025,
+                    10,
+                    27,
+                    7,
+                    50,
+                    55,
+                    212050,
+                    tzinfo=datetime.timezone.utc,
                 ),
             ),
             preserve_default=False,
