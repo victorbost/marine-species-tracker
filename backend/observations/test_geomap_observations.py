@@ -5,29 +5,40 @@ pytestmark = pytest.mark.django_db
 
 OBSERVATION_URL = "/api/v1/observations/"
 
+
 @pytest.fixture
 def client():
     return APIClient()
 
+
 @pytest.fixture
 def auth_user(client):
-    reg_resp = client.post("/api/v1/auth/register/", {
-        "email": "geomap@example.com",
-        "username": "geomapper",
-        "password": "GeoMap$123",
-        "role": "hobbyist"
-    }, format="json")
+    reg_resp = client.post(
+        "/api/v1/auth/register/",
+        {
+            "email": "geomap@example.com",
+            "username": "geomapper",
+            "password": "GeoMap$123",
+            "role": "hobbyist",
+        },
+        format="json",
+    )
     assert reg_resp.status_code in (200, 201)
-    login_resp = client.post("/api/v1/auth/login/", {
-        "email": "geomap@example.com",
-        "username": "geomapper",
-        "password": "GeoMap$123",
-        "role": "hobbyist"
-    }, format="json")
+    login_resp = client.post(
+        "/api/v1/auth/login/",
+        {
+            "email": "geomap@example.com",
+            "username": "geomapper",
+            "password": "GeoMap$123",
+            "role": "hobbyist",
+        },
+        format="json",
+    )
     assert login_resp.status_code == 200
     token = login_resp.data["access"]
     client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
     return client
+
 
 def make_observation(client, location, notes=""):
     data = {
@@ -38,12 +49,13 @@ def make_observation(client, location, notes=""):
         "temperature": 18.5,
         "visibility": 12,
         "notes": notes,
-        "location": { "type": "Point", "coordinates": location },
+        "location": {"type": "Point", "coordinates": location},
     }
     resp = client.post(OBSERVATION_URL, data, format="json")
     print(resp)
     assert resp.status_code in (200, 201)
     return resp.data
+
 
 def test_bbox_geo_filter_includes_correct_obs(auth_user):
     """
@@ -64,6 +76,7 @@ def test_bbox_geo_filter_includes_correct_obs(auth_user):
     assert "Inside Box" in found
     assert "Far Away" not in found
 
+
 def test_bbox_geo_filter_empty_when_no_match(auth_user):
     """
     BBox returns empty FeatureCollection if no points within.
@@ -75,6 +88,7 @@ def test_bbox_geo_filter_empty_when_no_match(auth_user):
     geojson = resp.json()["results"]
     assert geojson["type"] == "FeatureCollection"
     assert geojson["features"] == []
+
 
 def test_all_geo_observations_returned_without_filter(auth_user):
     """
@@ -89,6 +103,7 @@ def test_all_geo_observations_returned_without_filter(auth_user):
     for feat in geojson["features"]:
         assert feat["geometry"]["type"] == "Point"
         assert len(feat["geometry"]["coordinates"]) == 2
+
 
 def test_geojson_output_fields(auth_user):
     """

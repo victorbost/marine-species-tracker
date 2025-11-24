@@ -1,14 +1,17 @@
 # backend/map/views.py
 
+from django.contrib.gis.geos import Point
+from django.contrib.gis.measure import D
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import D
+
 from observations.models import Observation
+
 from .serializers import ObservationGeoSerializer
 
-@api_view(['GET'])
+
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def map_observations(request):
     """
@@ -25,9 +28,13 @@ def map_observations(request):
         try:
             lat, lng, radius = float(lat), float(lng), float(radius)
             point = Point(float(lng), float(lat))  # Note order: lng, lat!
-            queryset = queryset.filter(location__distance_lte=(point, D(km=radius)))
+            queryset = queryset.filter(
+                location__distance_lte=(point, D(km=radius))
+            )
         except (TypeError, ValueError):
-            return Response({"detail": "Invalid latitude/longitude/radius."}, status=400)
+            return Response(
+                {"detail": "Invalid latitude/longitude/radius."}, status=400
+            )
 
     # Optionally: restrict to validated/public only here!
     # queryset = queryset.filter(validated='validated')

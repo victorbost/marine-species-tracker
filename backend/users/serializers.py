@@ -1,9 +1,11 @@
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from observations.serializers import ObservationGeoSerializer
 
 User = get_user_model()
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     role = serializers.ChoiceField(choices=User.ROLE_CHOICES, required=True)
@@ -22,21 +24,34 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return user
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "email", "username", "role", "created_at", "updated_at")
+        fields = (
+            "id",
+            "email",
+            "username",
+            "role",
+            "created_at",
+            "updated_at",
+        )
         read_only_fields = ("id", "role", "created_at", "updated_at")
+
 
 class UserProfileSerializer(UserSerializer):
     observation_count = serializers.SerializerMethodField()
     observations = ObservationGeoSerializer(many=True, read_only=True)
 
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ("observation_count", "observations")
+        fields = UserSerializer.Meta.fields + (
+            "observation_count",
+            "observations",
+        )
 
     def get_observation_count(self, obj):
         return obj.observations.count()
+
 
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
     username = None
@@ -46,14 +61,16 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Remove username from fields
-        self.fields.pop('username', None)
+        self.fields.pop("username", None)
 
     def validate(self, attrs):
         email = attrs.get("email")
         password = attrs.get("password")
 
         if not email or not password:
-            raise serializers.ValidationError("Must include 'email' and 'password'.")
+            raise serializers.ValidationError(
+                "Must include 'email' and 'password'."
+            )
 
         try:
             user = User.objects.get(email=email)
