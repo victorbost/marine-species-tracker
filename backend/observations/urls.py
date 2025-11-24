@@ -1,10 +1,11 @@
 from django.urls import path
+
 from .views import (
-    ObservationListCreateView,
+    CuratedObservationListView,
     ObservationDetailView,
     ObservationExportView,
+    ObservationListCreateView,
     ObservationValidateView,
-    CuratedObservationListView,
 )
 
 urlpatterns = [

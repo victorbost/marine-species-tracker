@@ -1,22 +1,22 @@
 import logging
-import pytz
 import time
-from dateutil import parser
-from django.contrib.gis.geos import Point
-from species.models import CuratedObservation
-from .obis_api import OBISAPIClient
-from .worms_api import WoRMSAPIClient
+
 from django.conf import settings
+from django.contrib.gis.geos import Point
 from django.db import transaction
 
+from species.models import CuratedObservation
+
+from .obis_api import OBISAPIClient
 from .utils.etl_cleaning import (
     clean_string_to_capital_capital,
-    normalize_obis_depth,
-    to_float,
     get_harmonized_common_name,
+    normalize_obis_depth,
     parse_obis_event_date,
     standardize_sex,
+    to_float,
 )
+from .worms_api import WoRMSAPIClient
 
 logger = logging.getLogger(__name__)
 

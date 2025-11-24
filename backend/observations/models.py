@@ -1,12 +1,14 @@
-from django.db import models
+from io import BytesIO
+
 from django.conf import settings
 from django.contrib.gis.db import models as gis_models
-from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
-from core.models import TimeStampedModel
-from PIL import Image
-from io import BytesIO
 from django.core.files.base import ContentFile
+from django.core.validators import FileExtensionValidator
+from django.db import models
+from PIL import Image
+
+from core.models import TimeStampedModel
 
 
 def validate_image(image):

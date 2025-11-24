@@ -1,6 +1,7 @@
 # backend/map/urls.py
 
 from django.urls import path
+
 from .views import map_observations
 
 urlpatterns = [

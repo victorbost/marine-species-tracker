@@ -1,5 +1,6 @@
-import re
 import logging
+import re
+
 import pytz
 from dateutil import parser
 
@@ -153,11 +154,10 @@ def parse_obis_event_date(obis_id: str, event_date_str: str):
                 " not be parsed. Date/time fields set to None for this"
                 " record. Error: {ve}"
             )
-    except Exception as e:
+    except Exception:
         logger.warning(
             f"OBIS record {obis_id}: Unexpected error parsing 'eventDate'"
             f" '{event_date_str}'. Date/time fields set to None for this"
-            " record. Error: {e}"
         )
 
     return observation_datetime, observation_date

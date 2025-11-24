@@ -1,10 +1,12 @@
-from django.urls import reverse
-from rest_framework.test import APITestCase
-from rest_framework import status
+import datetime
+
 from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import Point
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
+
 from observations.models import Observation
-import datetime
 
 User = get_user_model()
 

@@ -1,0 +1,5 @@
+    [flake8]
+    ignore = C901,E501,W503
+    exclude = .git,__pycache__,.venv,venv/,*/venv/*,.vscode,*/migrations/*,*/settings.py,*/manage.py,*/wsgi.py,*/asgi.py,*/urls.py,*/node_modules/*
+    max-line-length = 79
+    max-complexity = 10

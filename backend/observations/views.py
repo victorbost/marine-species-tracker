@@ -1,11 +1,11 @@
-from rest_framework import generics, permissions
-from rest_framework.views import APIView
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_gis.filters import InBBoxFilter
-from rest_framework import status
+
 from .models import Observation
-from .serializers import ObservationGeoSerializer
 from .permissions import IsAdminOrResearcher
+from .serializers import ObservationGeoSerializer
 
 
 class ObservationListCreateView(generics.ListCreateAPIView):

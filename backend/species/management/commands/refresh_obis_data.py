@@ -1,8 +1,10 @@
 import threading
-from django.core.management.base import BaseCommand
-from django.conf import settings
-from species.tasks.obis_etl import trigger_full_obis_refresh
 from datetime import date, timedelta
+
+from django.conf import settings
+from django.core.management.base import BaseCommand
+
+from species.tasks.obis_etl import trigger_full_obis_refresh
 
 
 class Command(BaseCommand):

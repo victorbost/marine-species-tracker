@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
+
 from .models import Observation
 
 
@@ -33,12 +34,9 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
             if not user or not (
                 user.is_staff or getattr(user, "role", None) == "researcher"
             ):
-                raise serializers.ValidationError(
-                    {
-                        "validated": (
-                            "You do not have permission to validate"
-                            " observations."
-                        )
-                    }
-                )
+                raise serializers.ValidationError({
+                    "validated": (
+                        "You do not have permission to validate observations."
+                    )
+                })
         return super().update(instance, validated_data)

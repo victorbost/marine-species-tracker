@@ -3,7 +3,8 @@ from rest_framework import permissions
 
 class IsAdminOrResearcher(permissions.BasePermission):
     """
-    Custom permission to only allow admin or researcher users to validate observations.
+    Custom permission to only allow admin or researcher users
+    to validate observations.
     """
 
     def has_permission(self, request, view):

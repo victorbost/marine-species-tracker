@@ -1,14 +1,15 @@
-from rest_framework import generics, permissions
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.views import TokenObtainPairView
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
+
 from .serializers import (
-    UserSerializer,
+    EmailTokenObtainPairSerializer,
     RegisterSerializer,
     UserProfileSerializer,
-    EmailTokenObtainPairSerializer,
+    UserSerializer,
 )
 
 

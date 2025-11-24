@@ -1,11 +1,13 @@
 # backend/map/views.py
 
+from django.contrib.gis.geos import Point
+from django.contrib.gis.measure import D
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import D
+
 from observations.models import Observation
+
 from .serializers import ObservationGeoSerializer
 
 

@@ -25,6 +25,7 @@ whitenoise = "6.6.0"
 sentry-sdk = "1.39.2"
 djangorestframework-gis = "^1.2.0"
 drf-yasg = "^1.21.11"
+isort = "^7.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -46,4 +47,4 @@ build-backend = "poetry.core.masonry.api"
 preview = true
 line-length = 79
 enable-unstable-feature = ["string_processing"]
-target-version = ["py310", "py311", "py312", "py313"]
+target-version = ["py310", "py311", "py312"]
