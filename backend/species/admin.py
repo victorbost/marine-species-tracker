@@ -1,25 +1,27 @@
 from django.contrib import admin
-# No need to import OSMGeoAdmin if you're not using it
 from .models import CuratedObservation
 
 @admin.register(CuratedObservation)
-class CuratedObservationAdmin(admin.ModelAdmin): # Use standard ModelAdmin
+class CuratedObservationAdmin(admin.ModelAdmin):
     list_display = (
-        'id', # Primary key ID
+        'id',
         'species_name',
         'common_name',
         'obis_id',
         'observation_date',
         'observation_datetime',
-        'location', # This will display as text (e.g., POINT (X Y))
+        'location',
         'location_name',
         'machine_observation',
         'validated',
         'source',
-        'depth',
+        'depth_min',
+        'depth_max',
+        'bathymetry',
         'temperature',
         'visibility',
         'notes',
+        'sex',
         'image',
         'user',
     )
@@ -50,10 +52,13 @@ class CuratedObservationAdmin(admin.ModelAdmin): # Use standard ModelAdmin
         'machine_observation',
         'validated',
         'source',
-        'depth',
+        'depth_min',
+        'depth_max',
+        'bathymetry',
         'temperature',
         'visibility',
         'notes',
+        'sex',
         'image',
         'user',
         'raw_data',
