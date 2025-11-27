@@ -49,7 +49,7 @@ def fetch_and_store_obis_data(
     )
 
     try:
-        obis_records = obis_client.fetch_occurrences(
+        obis_records, _ = obis_client.fetch_occurrences(
             geometry=geometry_wkt,
             taxonid=taxonid,
             page=page,
@@ -202,14 +202,16 @@ def fetch_and_store_obis_data(
 def trigger_full_obis_refresh(
     geometry_wkt,
     taxonid=None,
-    initial_total_pages=1,
     start_date=None,
     end_date=None,
+    max_pages=None,
 ):
     """
-    Function to trigger a full or date-range refresh, fetching multiple pages.
+    Function to trigger a full or date-range refresh, fetching multiple pages dynamically.
     :param start_date: Date string (YYYY-MM-DD) for filtering. If None, no start date filter applied.
     :param end_date: Date string (YYYY-MM-DD) for filtering. If None, no end date filter applied.
+    :param max_pages: Optional maximum number of pages to fetch for a full refresh.
+                      Useful for testing or if full refresh is too large.
     """
     if start_date or end_date:
         refresh_type = "date-range incremental"
@@ -220,7 +222,44 @@ def trigger_full_obis_refresh(
         f" taxonid: {taxonid}, start_date: {start_date}, end_date: {end_date}"
     )
 
-    for page_num in range(initial_total_pages):
+    total_records = 0
+    total_pages = 0
+    current_page = 0
+    page_size = obis_client.default_size
+
+    # First, make a call to get the total number of records
+    # We fetch one record to get the 'total' count from the API response
+    initial_records, total_records = obis_client.fetch_occurrences(
+        geometry=geometry_wkt,
+        taxonid=taxonid,
+        size=1,
+        page=0,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+    if total_records > 0:
+        total_pages = (
+            total_records + page_size - 1
+        ) // page_size  # Ceiling division
+        print(
+            f"Total records to fetch: {total_records}, estimated pages:"
+            f" {total_pages}"
+        )
+    else:
+        print("No records found for the given criteria. Exiting refresh.")
+        return
+
+    # If max_pages is specified, limit the total_pages
+    if max_pages is not None and max_pages < total_pages:
+        print(
+            f"Limiting refresh to {max_pages} pages (out of"
+            f" {total_pages} total pages)."
+        )
+        total_pages = max_pages
+
+    for page_num in range(total_pages):
+        print(f"Processing page {page_num + 1} of {total_pages}...")
         fetch_and_store_obis_data(
             geometry_wkt,
             taxonid,
@@ -228,6 +267,9 @@ def trigger_full_obis_refresh(
             start_date=start_date,
             end_date=end_date,
         )
-        time.sleep(1)
+        time.sleep(1)  # Be respectful to the API, add a delay
 
-    print(f"Finished {refresh_type} OBIS refresh tasks.")
+    print(
+        f"Finished {refresh_type} OBIS refresh tasks. Total records processed:"
+        f" {total_records}."
+    )

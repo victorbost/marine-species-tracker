@@ -31,19 +31,26 @@ class Command(BaseCommand):
             "--taxonid", type=str, help="OBIS taxon ID", default=None
         )
         parser.add_argument(
-            "--pages",
+            "--max-pages",
             type=int,
-            help="Number of pages to fetch (per date range if applicable)",
-            default=getattr(settings, "OBIS_DEFAULT_FETCH_PAGES", 1),
+            help=(
+                "Maximum number of pages to fetch. For 'full' mode, this acts"
+                " as a limit if you don't want to fetch all available pages."
+                " For 'incremental' mode, it specifies the number of pages to"
+                " fetch."
+            ),
+            default=getattr(
+                settings, "OBIS_DEFAULT_FETCH_PAGES", None
+            ),  # Changed default to None
         )
         parser.add_argument(
             "--mode",
             type=str,
             choices=["full", "incremental"],
-            default="incremental",  # Default to incremental for monthly runs
+            default="incremental",
             help=(
-                'Refresh mode: "full" (all data) or "incremental" (using date'
-                " range, typically last month)."
+                'Refresh mode: "full" (all data dynamically paginated) or'
+                ' "incremental" (using date range, typically last month).'
             ),
         )
         parser.add_argument(
@@ -68,13 +75,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         geometry_wkt = options["geometry"]
         taxonid = options["taxonid"]
-        pages = options["pages"]
+        max_pages = options["max_pages"]
         mode = options["mode"]
         start_date_arg = options["start_date"]
         end_date_arg = options["end_date"]
 
         final_start_date = None
         final_end_date = None
+        pages_to_pass_to_etl = None
 
         if mode == "incremental":
             current_date = date.today()
@@ -90,6 +98,12 @@ class Command(BaseCommand):
             else:
                 # Default to today if incremental and end_date not specified
                 final_end_date = current_date.strftime("%Y-%m-%d")
+            # Calculate the specific page limit for incremental mode
+            pages_to_pass_to_etl = (
+                max_pages
+                if max_pages is not None
+                else getattr(settings, "OBIS_DEFAULT_FETCH_PAGES", 1)
+            )
 
             self.stdout.write(
                 "Running in INCREMENTAL mode, fetching data with eventDate"
@@ -99,6 +113,9 @@ class Command(BaseCommand):
             self.stdout.write(
                 "Running in FULL REFRESH mode (no date filters applied)."
             )
+        # For full mode, the max_pages from options is passed directly.
+        # If --max-pages wasn't specified, this will be None, allowing full dynamic pagination.
+        pages_to_pass_to_etl = max_pages
 
         self.stdout.write(
             "Starting OBIS data refresh in a background thread..."
@@ -109,9 +126,9 @@ class Command(BaseCommand):
             args=(
                 geometry_wkt,
                 taxonid,
-                pages,
                 final_start_date,
                 final_end_date,
+                pages_to_pass_to_etl,
             ),
         )
         etl_thread.start()

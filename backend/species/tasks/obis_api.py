@@ -7,7 +7,7 @@ class OBISAPIClient:
     def __init__(
         self,
         base_url="https://api.obis.org/v3/",
-        default_size=100,
+        default_size=500,
         logger=None,
     ):
         self.base_url = base_url
@@ -37,7 +37,7 @@ class OBISAPIClient:
         :param page: Page number (for pagination)
         :param start_date: Date string (YYYY-MM-DD) to fetch records with eventDate >= this.
         :param end_date: Date string (YYYY-MM-DD) to fetch records with eventDate <= this.
-        :return: List of occurrence records
+        :return: Tuple (list of occurrence records, total count of records)
         """
         endpoint = f"{self.base_url}occurrence"
         params = {
@@ -47,9 +47,9 @@ class OBISAPIClient:
         }
         if taxonid:
             params["taxonid"] = taxonid
-        if start_date:  # Add this condition
+        if start_date:
             params["startdate"] = start_date
-        if end_date:  # Add this condition
+        if end_date:
             params["enddate"] = end_date
 
         self.logger.info(
@@ -59,10 +59,11 @@ class OBISAPIClient:
             response = requests.get(endpoint, params=params, timeout=30)
             response.raise_for_status()
             data = response.json()
-            return data.get("results", [])
+            total_count = data.get("total", 0)
+            return data.get("results", []), total_count
         except requests.exceptions.RequestException as e:
             self.logger.error(f"OBIS API request failed: {e}")
-            return []
+            return [], 0
         except json.JSONDecodeError:
             self.logger.error("Failed to decode JSON response from OBIS API.")
-            return []
+            return [], 0
