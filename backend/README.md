@@ -88,30 +88,44 @@ This backend **now uses [Poetry](https://python-poetry.org/)** instead of `requi
 
 This backend includes an Extract, Transform, Load (ETL) pipeline to fetch and curate marine species occurrence data from the **OBIS API** and enrich it with common names from the **WoRMS API**. The curated data is stored in the `CuratedObservation` model in the `species` app.
 
-The ETL is designed for periodic execution with two modes:
+The ETL is designed for periodic execution with two primary modes:
 
--   **Incremental Refresh:** Fetches only records updated or created within a specified date range (defaulting to the last month). This is efficient for regular updates.
--   **Full Refresh:** Fetches all available data, ensuring comprehensive data integrity and catching any older record updates or deletions from the source. This is for less frequent, deep synchronization.
+-   **Incremental Refresh:** Efficiently fetches only records updated or created within a specified date range (defaulting to the last month). This mode is ideal for regular updates.
+-   **Full Refresh:** Dynamically fetches all available data from OBIS, ensuring comprehensive data integrity. This mode is suitable for less frequent, deep synchronizations.
+
+**Geographical Scope (`--geometry` parameter):**
+All OBIS queries require a geographical filter. The ETL command provides a `--geometry` argument where you can specify a WKT (Well-Known Text) string to define your area of interest (e.g., `POLYGON((-80 30, -80 50, -30 50, -30 30, -80 30))`).
+
+**Crucially, if you omit the `--geometry` argument, it defaults to a global polygon (`POLYGON((-180 -90, 180 -90, 180 90, -180 90, -180 -90))`), allowing you to fetch all available OBIS data worldwide.**
 
 ### **Manual Execution for Testing / On-Demand Sync (via Docker)**
 
-You can run the ETL process manually from your terminal. The command executes in a background thread within the `backend` container, and logs are printed directly to your terminal.
+You can run the ETL process manually from your terminal. The command executes in a background thread within the `backend` container, and logs are printed directly to your terminal. A `time.sleep(1)` delay is introduced between page fetches to be respectful to the OBIS API.
 
--   **Run Incremental Refresh (last month's data, 1 page):**
+-   **Run Incremental Refresh (last month's data):**
+    Fetches a default number of pages (configurable in settings as `OBIS_DEFAULT_FETCH_PAGES`) for the last month.
 
-    docker-compose exec backend python manage.py refresh_obis_data --mode incremental --pages 1
-        *   To specify a custom date range (YYYY-MM-DD):
 
-        docker-compose exec backend python manage.py refresh_obis_data --mode incremental --start-date 2024-01-01 --end-date 2024-01-31 --pages 5
-        -   **Run Full Refresh (all data, 1 page):**
+    docker-compose exec backend python manage.py refresh_obis_data --mode incremental
+        *   To specify a custom date range (YYYY-MM-DD) and/or a maximum number of pages:
 
-    docker-compose exec backend python manage.py refresh_obis_data --mode full --pages 1
-        *   Increase `--pages` for more data. For a complete full refresh, `trigger_full_obis_refresh` might need to be enhanced to automatically paginate through all available OBIS results.
+        docker-compose exec backend python manage.py refresh_obis_data --mode incremental --start-date 2024-01-01 --end-date 2024-01-31 --max-pages 5
+        -   **Run Full Refresh (all data, dynamically paginated):**
+    This mode will automatically determine the total number of pages from the OBIS API and fetch them sequentially.
 
--   **Check the number of records in the database:**
+
+    docker-compose exec backend python manage.py refresh_obis_data --mode full
+        *   To limit the number of pages fetched for a full refresh (e.g., for testing or partial syncs):
+
+        docker-compose exec backend python manage.py refresh_obis_data --mode full --max-pages 1000
+            *   To specify a custom geometry for either mode (e.g., for a specific region):
+
+        docker-compose exec backend python manage.py refresh_obis_data --mode full --geometry "POLYGON((-70 40, -70 50, -60 50, -60 40, -70 40))"
+        -   **Check the number of records in the database:**
 
     docker-compose exec db psql -U postgres -d marine_tracker -c "SELECT COUNT(*) AS total_observations, COUNT(DISTINCT species_name) AS distinct_species_names FROM species_curatedobservation;"
     ### **EC2 Configuration: Automated Monthly & Bi-Annual Cron Jobs**
+
 For production deployment on an EC2 instance, you will configure system-level cron jobs to execute these commands automatically.
 
 1.  **Ensure Docker Compose is set up and running your services on the EC2 instance.**
@@ -121,14 +135,13 @@ For production deployment on an EC2 instance, you will configure system-level cr
     crontab -e
     3.  **Add the following cron entries:**
 
-
     # Monthly Incremental Refresh (1st day of month, 03:00 UTC)
     # Fetches data with eventDate in the last month (date range handled by script default).
     0 3 1 * * cd /path/to/your/marine-species-tracker && docker-compose exec backend python manage.py refresh_obis_data --mode incremental >> /var/log/obis_refresh_monthly.log 2>&1
 
     # Bi-Annual Full Refresh (1st day of January and July, 04:00 UTC)
-    # Fetches ALL data (no date filters applied). Adjust --pages as needed for full sync.
-    0 4 1 1,7 * cd /path/to/your/marine-species-tracker && docker-compose exec backend python manage.py refresh_obis_data --mode full --pages 1000 >> /var/log/obis_refresh_biannual.log 2>&1
+    # Fetches ALL data (global geometry, dynamically paginated).
+    0 4 1 1,7 * cd /path/to/your/marine-species-tracker && docker-compose exec backend python manage.py refresh_obis_data --mode full >> /var/log/obis_refresh_biannual.log 2>&1
         *   **`/path/to/your/marine-species-tracker`**: Replace this with the actual absolute path to your project's root directory on the EC2 instance (where `docker-compose.yml` is located).
     *   **Log Files**: `>> /var/log/obis_refresh_monthly.log 2>&1` redirects all output to a log file, which is crucial for monitoring and troubleshooting cron jobs.
 
