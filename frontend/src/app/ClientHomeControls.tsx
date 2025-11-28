@@ -59,8 +59,8 @@ export default function ClientHomeControls() {
       },
     });
     // Redirect to login page after successful (or attempted) logout
-    router.replace("/login");
-    // window.location.reload(); // No longer needed as we are directly redirecting
+    // router.replace("/login");
+    window.location.reload(); // No longer needed as we are directly redirecting
   };
 
   if (loading) return <div>Loading...</div>;

@@ -58,14 +58,9 @@ class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        print("\n[BACKEND DEBUG] Entering LogoutView.post method.")
 
         # Perform Django's built-in logout to invalidate the session
         logout(request)
-        print(
-            "[BACKEND DEBUG] Django session invalidated via"
-            " django.contrib.auth.logout."
-        )
 
         resp = Response({"detail": "Logged out"}, status=200)
 
@@ -81,47 +76,22 @@ class LogoutView(APIView):
             "AUTH_COOKIE_SAMESITE", "Lax"
         )
 
-        print(
-            f"[BACKEND DEBUG] Deleting cookies with path='{cookie_path}',"
-            f" domain='{cookie_domain}', samesite='{cookie_samesite}'"
-        )
-
         # Delete access_token cookie
         access_cookie_name = settings.SIMPLE_JWT["AUTH_COOKIE"]
-        print(
-            "[BACKEND DEBUG] Attempting to delete access cookie:"
-            f" '{access_cookie_name}'"
-        )
         resp.delete_cookie(
             access_cookie_name,
             path=cookie_path,
             domain=cookie_domain,
             samesite=cookie_samesite,
         )
-        print(
-            "[BACKEND DEBUG] Finished attempting to delete access cookie:"
-            f" '{access_cookie_name}'"
-        )
 
         # Delete refresh_token cookie
         refresh_cookie_name = settings.SIMPLE_JWT["AUTH_COOKIE_REFRESH"]
-        print(
-            "[BACKEND DEBUG] Attempting to delete refresh cookie:"
-            f" '{refresh_cookie_name}'"
-        )
         resp.delete_cookie(
             refresh_cookie_name,
             path=cookie_path,
             domain=cookie_domain,
             samesite=cookie_samesite,
         )
-        print(
-            "[BACKEND DEBUG] Finished attempting to delete refresh cookie:"
-            f" '{refresh_cookie_name}'"
-        )
-
-        print(
-            "[BACKEND DEBUG] Returning response with status"
-            f" {resp.status_code}"
-        )
+        
         return resp
