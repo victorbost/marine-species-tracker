@@ -1,5 +1,7 @@
-import "@/styles/globals.css";
+import "../styles/globals.css";
 import React from "react";
+import { UserProvider } from "../components/UserProvider";
+import AppContent from "./AppContent";
 
 export default function RootLayout({
   children,
@@ -8,7 +10,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <UserProvider>
+        <body>
+          <AppContent>{children}</AppContent>
+        </body>
+      </UserProvider>
     </html>
   );
 }
