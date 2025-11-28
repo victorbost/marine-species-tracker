@@ -1,16 +1,17 @@
+import dynamic from "next/dynamic";
+import ClientHomeControls from "./ClientHomeControls";
+
 export const metadata = {
-  title: 'Marine Species Observation Tracker',
-  description: 'Track and explore marine species observations',
+  title: "Marine Species Observation Tracker",
+  description: "Track and explore marine species observations",
   icons: {
-    icon: '/favicon.ico'
+    icon: "/favicon.ico",
   },
 };
-import ClientHomeControls from './ClientHomeControls';
-import dynamic from 'next/dynamic';
 
 const DynamicMapComponent = dynamic(
-  () => import('../components/MapComponent'),
-  { ssr: false }
+  () => import("../components/MapComponent"),
+  { ssr: false },
 );
 export default function Home() {
   return (
@@ -25,7 +26,9 @@ export default function Home() {
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
           <h2 className="text-2xl font-semibold mb-4">Welcome to Your MVP!</h2>
           {/* ... existing code ... */}
-          <div style={{ marginBottom: '20px' }}> {/* Add some spacing */}
+          <div style={{ marginBottom: "20px" }}>
+            {" "}
+            {/* Add some spacing */}
             <DynamicMapComponent /> {/* Render your map here */}
           </div>
           <ClientHomeControls />

@@ -1,14 +1,14 @@
-import axios from 'axios'
+import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export const api = axios.create({
   baseURL: `${API_URL}/api`,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   withCredentials: true, // Crucial for sending and receiving cookies
-})
+});
 
 // Store state for managing token refresh and preventing race conditions
 let isRefreshing = false;
@@ -37,7 +37,10 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Check if the error is 401 Unauthorized and it's not the refresh token request itself
-    if (error.response?.status === 401 && originalRequest.url !== '/v1/auth/token/refresh/') {
+    if (
+      error.response?.status === 401 &&
+      originalRequest.url !== "/v1/auth/token/refresh/"
+    ) {
       // Mark the original request as retried to prevent infinite loops
       originalRequest._retry = true;
 
@@ -58,7 +61,7 @@ api.interceptors.response.use(
         const refreshResponse = await axios.post(
           `${API_URL}/api/v1/auth/token/refresh/`, // Your refresh token endpoint
           {}, // No body needed; refresh token is sent via HttpOnly cookie
-          { withCredentials: true }
+          { withCredentials: true },
         );
 
         // On successful refresh, the backend will have set new cookies.
@@ -71,13 +74,13 @@ api.interceptors.response.use(
         // If refresh fails, clear the refreshing state and redirect to login
         isRefreshing = false;
         processQueue(refreshError, null);
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login'; // Redirect to login page
+        if (typeof window !== "undefined") {
+          window.location.href = "/login"; // Redirect to login page
         }
         return Promise.reject(refreshError);
       }
     }
 
     return Promise.reject(error);
-  }
+  },
 );

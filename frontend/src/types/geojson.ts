@@ -6,19 +6,19 @@ export interface GeoJsonFeatureProperties {
   common_name?: string;
   observation_datetime: string;
   location_name: string;
-  source: 'user' | 'obis' | 'other';
+  source: "user" | "obis" | "other";
 }
 
 export interface GeoJsonFeature {
-  type: 'Feature';
+  type: "Feature";
   properties: GeoJsonFeatureProperties;
   geometry: {
-    type: 'Point';
+    type: "Point";
     coordinates: [number, number];
   };
 }
 
 export interface GeoJsonFeatureCollection {
-  type: 'FeatureCollection';
+  type: "FeatureCollection";
   features: GeoJsonFeature[];
 }

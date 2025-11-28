@@ -20,8 +20,7 @@ export default function LoginPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, password }),
-    }
-  );
+    });
 
     if (res.ok) {
       router.replace("/");
@@ -34,10 +33,14 @@ export default function LoginPage() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input value={email} onChange={e => setEmail(e.target.value)} placeholder="email" />
+      <input
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="email"
+      />
       <input
         value={password}
-        onChange={e => setPassword(e.target.value)}
+        onChange={(e) => setPassword(e.target.value)}
         placeholder="password"
         type="password"
       />
