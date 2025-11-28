@@ -1,6 +1,6 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 type User = {
   username: string;
@@ -8,27 +8,24 @@ type User = {
 };
 
 function getCookie(name: string) {
-  if (typeof document === 'undefined') {
+  if (typeof document === "undefined") {
     return null; // Document is not available on the server-side
   }
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) {
-    const cookieValue = parts.pop()?.split(';').shift();
-    console.log(`[CSRF DEBUG] getCookie('${name}') returning:`, cookieValue); // DEBUG LOG
+    const cookieValue = parts.pop()?.split(";").shift();
     return cookieValue;
   }
-  console.log(`[CSRF DEBUG] getCookie('${name}') returning: null (cookie not found)`); // DEBUG LOG
   return null;
 }
 
 export default function ClientHomeControls() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
-    fetch(process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/profiles/me/", {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/profiles/me/`, {
       credentials: "include",
     })
       .then(async (res) => {
@@ -37,20 +34,19 @@ export default function ClientHomeControls() {
           setUser(data);
         } else {
           const text = await res.text();
-          console.error("me fail, status:", res.status, "body:", text);
+          console.error("me fail, status:", res.status, "body:", text); // eslint-disable-line no-console
         }
         setLoading(false);
       })
       .catch((err) => {
-        console.error("me request failed", err);
+        console.error("me request failed", err); // eslint-disable-line no-console
         setLoading(false);
       });
   }, []);
   const handleLogout = async () => {
-    const csrftoken = getCookie('csrftoken');
-    console.log("[CSRF DEBUG] CSRF token retrieved for logout:", csrftoken);
+    const csrftoken = getCookie("csrftoken");
 
-    await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/logout/", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/logout/`, {
       method: "POST",
       credentials: "include",
       headers: {
@@ -59,8 +55,7 @@ export default function ClientHomeControls() {
       },
     });
     // Redirect to login page after successful (or attempted) logout
-    // router.replace("/login");
-    window.location.reload(); // No longer needed as we are directly redirecting
+    window.location.reload();
   };
 
   if (loading) return <div>Loading...</div>;
@@ -73,6 +68,7 @@ export default function ClientHomeControls() {
         <button
           onClick={handleLogout}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          type="button"
         >
           Logout
         </button>

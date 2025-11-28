@@ -93,5 +93,5 @@ class LogoutView(APIView):
             domain=cookie_domain,
             samesite=cookie_samesite,
         )
-        
+
         return resp
