@@ -7,7 +7,7 @@ export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // Crucial for sending and receiving cookies
+  withCredentials: true,
 });
 
 // Store state for managing token refresh and preventing race conditions
@@ -20,7 +20,7 @@ let failedQueue: Array<{
 // Helper to process the queue of failed requests
 const processQueue = (
   error: AxiosError | null,
-  token: string | null = null,
+  _token: string | null = null,
 ) => {
   failedQueue.forEach((prom) => {
     if (error) {
@@ -61,8 +61,8 @@ api.interceptors.response.use(
       try {
         // Attempt to refresh the token
         // Use a direct axios call (not the 'api' instance) to avoid re-triggering this interceptor
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const refreshResponse = await axios.post(
-          // eslint-disable-line @typescript-eslint/no-unused-vars
           `${API_URL}/api/v1/auth/token/refresh/`, // Your refresh token endpoint
           {}, // No body needed; refresh token is sent via HttpOnly cookie
           { withCredentials: true },

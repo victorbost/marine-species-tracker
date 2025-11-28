@@ -2,12 +2,14 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "../../components/UserProvider";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  const { refetchUser } = useUser(); // Get refetchUser from context
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -23,6 +25,7 @@ export default function LoginPage() {
     });
 
     if (res.ok) {
+      await refetchUser(); // Refetch user data after successful login
       router.replace("/");
     } else {
       const text = await res.text();

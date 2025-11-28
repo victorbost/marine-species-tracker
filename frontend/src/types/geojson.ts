@@ -1,5 +1,3 @@
-// frontend/src/types/geojson.ts
-
 export interface GeoJsonFeatureProperties {
   id: number;
   species_name: string;
