@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -26,7 +26,7 @@ export default function LoginPage() {
       router.replace("/");
     } else {
       const text = await res.text();
-      console.error("Login fail, status:", res.status, "body:", text);
+      console.error("Login fail, status:", res.status, "body:", text); // eslint-disable-line no-console
       setError("Invalid credentials");
     }
   }

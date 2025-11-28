@@ -37,7 +37,7 @@ export default function MapComponent() {
         const data: GeoJsonFeatureCollection = await response.json();
         setObservations(data.features);
       } catch (error) {
-        console.error("Failed to fetch observations:", error);
+        console.error("Failed to fetch observations:", error); // eslint-disable-line no-console
       }
     };
 

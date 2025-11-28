@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 type User = {
   username: string;
@@ -35,12 +34,12 @@ export default function ClientHomeControls() {
           setUser(data);
         } else {
           const text = await res.text();
-          console.error("me fail, status:", res.status, "body:", text);
+          console.error("me fail, status:", res.status, "body:", text); // eslint-disable-line no-console
         }
         setLoading(false);
       })
       .catch((err) => {
-        console.error("me request failed", err);
+        console.error("me request failed", err); // eslint-disable-line no-console
         setLoading(false);
       });
   }, []);
@@ -69,6 +68,7 @@ export default function ClientHomeControls() {
         <button
           onClick={handleLogout}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          type="button"
         >
           Logout
         </button>
