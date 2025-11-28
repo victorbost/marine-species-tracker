@@ -1,13 +1,31 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 type User = {
   username: string;
   email: string;
 };
+
+function getCookie(name: string) {
+  if (typeof document === 'undefined') {
+    return null; // Document is not available on the server-side
+  }
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    const cookieValue = parts.pop()?.split(';').shift();
+    console.log(`[CSRF DEBUG] getCookie('${name}') returning:`, cookieValue); // DEBUG LOG
+    return cookieValue;
+  }
+  console.log(`[CSRF DEBUG] getCookie('${name}') returning: null (cookie not found)`); // DEBUG LOG
+  return null;
+}
+
 export default function ClientHomeControls() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     fetch(process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/profiles/me/", {
@@ -28,13 +46,21 @@ export default function ClientHomeControls() {
         setLoading(false);
       });
   }, []);
-
   const handleLogout = async () => {
+    const csrftoken = getCookie('csrftoken');
+    console.log("[CSRF DEBUG] CSRF token retrieved for logout:", csrftoken);
+
     await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/logout/", {
       method: "POST",
       credentials: "include",
+      headers: {
+        "X-CSRFToken": csrftoken || "",
+        "Content-Type": "application/json",
+      },
     });
-    window.location.reload();
+    // Redirect to login page after successful (or attempted) logout
+    // router.replace("/login");
+    window.location.reload(); // No longer needed as we are directly redirecting
   };
 
   if (loading) return <div>Loading...</div>;

@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from datetime import timedelta
 
 from dotenv import load_dotenv
 
@@ -140,7 +141,24 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ],
 }
-
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),  # Recommended: 15 minutes
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Recommended: 7 days
+    "ROTATE_REFRESH_TOKENS": True,  # Recommended: Enabled
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_COOKIE": (
+        "access_token"
+    ),  # The name of the cookie for the access token
+    "AUTH_COOKIE_REFRESH": (
+        "refresh_token"
+    ),  # The name of the cookie for the refresh token
+    "AUTH_COOKIE_DOMAIN": None,
+    "AUTH_COOKIE_SECURE": True,  # Recommended: Secure
+    "AUTH_COOKIE_HTTP_ONLY": True,  # Recommended: HttpOnly
+    "AUTH_COOKIE_SAMESITE": "Lax",  # Recommended: SameSite=Lax
+    "AUTH_COOKIE_PATH": "/",
+    "AUTH_COOKIE_EXPIRE_DAYS": 7,  # Expiration of the refresh cookie
+}
 # =============================================================================
 # CORS
 # =============================================================================
@@ -152,6 +170,11 @@ CORS_ALLOWED_ORIGINS = os.getenv(
     "http://localhost:3000,http://127.0.0.1:3000,http://0.0.0.0",
 ).split(",")
 
+# Add trusted origins for CSRF
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000",
+).split(",")
 # =============================================================================
 # Security Settings — AUTO-SWITCH for DEV vs PROD
 # =============================================================================
