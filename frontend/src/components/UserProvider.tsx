@@ -54,15 +54,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setUser(data);
       } else {
         setUser(null);
-        if (pathname !== "/login") {
-          router.push("/login");
+        if (pathname !== "/sign-in" && pathname !== "/sign-up") {
+          router.push("/sign-in");
         }
       }
     } catch (err) {
       console.error("me request failed", err); // eslint-disable-line no-console
       setUser(null);
-      if (pathname !== "/login") {
-        router.push("/login");
+      if (pathname !== "/sign-in" && pathname !== "/sign-up") {
+        router.push("/sign-in");
       }
     } finally {
       setLoading(false);
@@ -89,7 +89,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       },
     });
     setUser(null);
-    router.push("/login");
+    router.push("/sign-in");
   }, [router]); // Dependencies for logout
 
   const contextValue = useMemo(

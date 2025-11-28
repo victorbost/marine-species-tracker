@@ -13,7 +13,7 @@ export default function AppContent({
   const { user, loading } = useUser();
   const pathname = usePathname();
 
-  const shouldShowHeader = !loading && user && pathname !== "/login";
+  const shouldShowHeader = !loading && user && pathname !== "/sign-in";
 
   return (
     <>

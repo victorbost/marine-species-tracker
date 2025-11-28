@@ -79,7 +79,7 @@ api.interceptors.response.use(
         isRefreshing = false;
         processQueue(refreshError as AxiosError, null);
         if (typeof window !== "undefined") {
-          window.location.href = "/login"; // Redirect to login page
+          window.location.href = "/sign-in"; // Redirect to login page
         }
         return Promise.reject(refreshError);
       }
