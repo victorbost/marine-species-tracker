@@ -16,6 +16,7 @@
     },
     "ecmaVersion": 2020,
     "sourceType": "module",
+    // "tsconfigRootDir": "./frontend/",
     "tsconfigRootDir": ".",
     "project": ["./tsconfig.json"]
   },
@@ -60,6 +61,16 @@
     }],
     "react/require-default-props": "off"
   },
+  "overrides": [
+    {
+      "files": ["src/components/ui/**/*.{ts,tsx}"],
+      "rules": {
+        "react/jsx-props-no-spreading": "off",
+        "react/jsx-no-constructed-context-values": "off",
+        "@typescript-eslint/no-use-before-define": "off"
+      }
+    }
+  ],
   "settings": {
     "react": {
       "version": "detect"

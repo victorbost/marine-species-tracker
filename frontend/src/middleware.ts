@@ -3,7 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   // Exclude login and static public routes
-  if (pathname === "/login" || pathname.startsWith("/_next/")) {
+  if (
+    pathname === "/sign-in" ||
+    pathname === "/sign-up" ||
+    pathname.startsWith("/_next/")
+  ) {
     return NextResponse.next();
   }
 
@@ -21,7 +25,7 @@ export async function middleware(request: NextRequest) {
 
   if (res.status !== 200) {
     // Not authenticated: redirect to login
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
   return NextResponse.next();
