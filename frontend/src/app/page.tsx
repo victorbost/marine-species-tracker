@@ -26,7 +26,7 @@ export default function Home() {
         setData("Data loaded successfully!");
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error("Failed to fetch data:", error); 
+        console.error("Failed to fetch data:", error);
         setData("Failed to load data.");
       } finally {
         stopLoading();

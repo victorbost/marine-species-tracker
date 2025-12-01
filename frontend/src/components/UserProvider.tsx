@@ -70,8 +70,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [pathname, router]);
 
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser]); // fetchUser is now a dependency
+    if (pathname !== "/sign-in" && pathname !== "/sign-up") {
+      fetchUser();
+    }
+  }, [fetchUser, pathname]);
 
   const refetchUser = useCallback(() => {
     fetchUser();
