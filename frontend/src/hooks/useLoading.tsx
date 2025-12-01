@@ -40,7 +40,7 @@ function LoadingProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export { LoadingProvider }; 
+export { LoadingProvider };
 export const useLoading = () => {
   const context = useContext(LoadingContext);
   if (context === undefined) {
