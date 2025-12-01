@@ -1,7 +1,15 @@
 // frontend/src/hooks/useLoading.tsx
+
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from "react";
 
 interface LoadingContextType {
   isLoading: boolean;
@@ -11,23 +19,32 @@ interface LoadingContextType {
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
-export const LoadingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+function LoadingProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const startLoading = () => setIsLoading(true);
-  const stopLoading = () => setIsLoading(false);
+  const startLoading = useCallback(() => setIsLoading(true), []);
+  const stopLoading = useCallback(() => setIsLoading(false), []);
 
+  const contextValue = useMemo(
+    () => ({
+      isLoading,
+      startLoading,
+      stopLoading,
+    }),
+    [isLoading, startLoading, stopLoading],
+  );
   return (
-    <LoadingContext.Provider value={{ isLoading, startLoading, stopLoading }}>
+    <LoadingContext.Provider value={contextValue}>
       {children}
     </LoadingContext.Provider>
   );
-};
+}
 
+export { LoadingProvider }; 
 export const useLoading = () => {
   const context = useContext(LoadingContext);
   if (context === undefined) {
-    throw new Error('useLoading must be used within a LoadingProvider');
+    throw new Error("useLoading must be used within a LoadingProvider");
   }
   return context;
 };

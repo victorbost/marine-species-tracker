@@ -8,7 +8,6 @@ import ShadcnDynamicForm from "../../components/ShadcnDynamicForm";
 import { FormField } from "../../types/form";
 import { useLoading } from "../../hooks/useLoading"; // Import the global loading hook
 
-
 const signinSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(1, { message: "Password is required." }),
@@ -19,7 +18,6 @@ export default function SigninPage() {
   const router = useRouter();
   const { refetchUser } = useUser();
   const { startLoading, stopLoading, isLoading } = useLoading(); // Use global loading state and functions
-
 
   const signinFields: FormField[] = [
     {

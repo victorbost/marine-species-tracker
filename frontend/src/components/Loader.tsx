@@ -1,20 +1,21 @@
 // frontend/src/components/Loader.tsx
-"use client"
 
-import React from 'react';
-import { DNA } from 'react-loader-spinner';
+"use client";
+
+import React from "react";
+import { DNA } from "react-loader-spinner";
 
 interface LoaderProps {
   isLoading: boolean;
 }
 
-const Loader: React.FC<LoaderProps> = ({ isLoading }) => {
+function Loader({ isLoading }: LoaderProps) {
   if (!isLoading) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-800 bg-opacity-50">
       <DNA
-        visible={true}
+        visible
         height="80"
         width="80"
         ariaLabel="dna-loading"
@@ -23,6 +24,6 @@ const Loader: React.FC<LoaderProps> = ({ isLoading }) => {
       />
     </div>
   );
-};
+}
 
 export default Loader;

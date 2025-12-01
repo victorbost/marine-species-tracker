@@ -1,11 +1,11 @@
 // frontend/src/app/page.tsx
-"use client"
+
+"use client";
 
 import dynamic from "next/dynamic";
+import React, { useEffect, useState } from "react";
 import ClientHomeControls from "./ClientHomeControls";
-import { useLoading } from '../hooks/useLoading';
-import React, { useEffect, useState } from 'react';
-
+import { useLoading } from "../hooks/useLoading";
 
 const DynamicMapComponent = dynamic(
   () => import("../components/MapComponent"),
@@ -20,10 +20,13 @@ export default function Home() {
     const fetchData = async () => {
       startLoading();
       try {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => {
+          setTimeout(resolve, 2000);
+        });
         setData("Data loaded successfully!");
       } catch (error) {
-        console.error("Failed to fetch data:", error);
+        // eslint-disable-next-line no-console
+        console.error("Failed to fetch data:", error); 
         setData("Failed to load data.");
       } finally {
         stopLoading();

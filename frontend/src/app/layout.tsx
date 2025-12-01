@@ -1,11 +1,10 @@
 import "../styles/globals.css";
 import React from "react";
+import { Inter } from "next/font/google";
 import { UserProvider } from "../components/UserProvider";
 import AppContent from "./AppContent";
-import { LoadingProvider, useLoading } from '../hooks/useLoading';
-import Loader from '../components/Loader';
-import { Inter } from "next/font/google";
-import GlobalLoader from '../components/GlobalLoader';
+import { LoadingProvider } from "../hooks/useLoading";
+import GlobalLoader from "../components/GlobalLoader";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,9 +26,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <UserProvider>
           <LoadingProvider>
-            <AppContent>
-              {children}
-            </AppContent>
+            <AppContent>{children}</AppContent>
             <GlobalLoader />
           </LoadingProvider>
         </UserProvider>
