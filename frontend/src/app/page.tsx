@@ -25,11 +25,9 @@ export default function Home() {
         </p>
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
           <h2 className="text-2xl font-semibold mb-4">Welcome to Your MVP!</h2>
-          {/* ... existing code ... */}
           <div style={{ marginBottom: "20px" }}>
             {" "}
-            {/* Add some spacing */}
-            <DynamicMapComponent /> {/* Render your map here */}
+            <DynamicMapComponent />
           </div>
           <ClientHomeControls />
         </div>

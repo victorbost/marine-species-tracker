@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod"; // Import zod
 import ShadcnDynamicForm from "../../components/ShadcnDynamicForm"; // Updated import path
@@ -55,46 +55,50 @@ export default function SignupPage() {
     },
   ];
 
-  async function handleSignup(values: z.infer<typeof signupSchema>) {
-    setLoading(true);
-    setError("");
+  const handleSignup = useCallback(
+    async (values: z.infer<typeof signupSchema>) => {
+      setLoading(true);
+      setError("");
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-    try {
-      const res = await fetch(`${API_URL}/api/v1/auth/register/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values), // Send validated values directly
-      });
+      try {
+        const res = await fetch(`${API_URL}/api/v1/auth/register/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        });
 
-      if (res.ok) {
-        router.replace("/sign-in");
-      } else {
-        const errorData = await res.json();
-        console.error(
-          "Sign up failed, status:",
-          res.status,
-          "body:",
-          errorData,
-        );
-        setError(
-          errorData.detail ||
-            errorData.email?.[0] ||
-            errorData.username?.[0] ||
-            errorData.password?.[0] ||
-            "Sign up failed. Please try again.",
-        );
+        if (res.ok) {
+          router.replace("/sign-in");
+        } else {
+          const errorData = await res.json();
+          // eslint-disable-next-line no-console
+          console.error(
+            "Sign up failed, status:",
+            res.status,
+            "body:",
+            errorData,
+          );
+          setError(
+            errorData.detail ||
+              errorData.email?.[0] ||
+              errorData.username?.[0] ||
+              errorData.password?.[0] ||
+              "Sign up failed. Please try again.",
+          );
+        }
+      } catch (err) {
+        console.error("Network error during sign up:", err); // eslint-disable-line no-console
+        setError("Network error. Please try again.");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Network error during sign up:", err);
-      setError("Network error. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
+    },
+    [setLoading, setError, router],
+  );
 
   return (
     <ShadcnDynamicForm
