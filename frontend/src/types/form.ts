@@ -25,10 +25,10 @@ export interface FormField {
   options?: FormFieldOption[];
 }
 
-export interface DynamicFormProps<T extends z.ZodSchema<FieldValues>> {
-  schema: T;
+export interface DynamicFormProps<T extends FieldValues> {
+  schema: z.ZodSchema<T, any>;
   fields: FormField[];
-  onSubmit: (values: z.infer<T>) => Promise<void>;
+  onSubmit: (values: T) => Promise<void>;
   submitButtonText: string;
   formTitle: string;
   error?: string;

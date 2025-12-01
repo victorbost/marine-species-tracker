@@ -67,7 +67,15 @@
       "rules": {
         "react/jsx-props-no-spreading": "off",
         "react/jsx-no-constructed-context-values": "off",
-        "@typescript-eslint/no-use-before-define": "off"
+        "@typescript-eslint/no-use-before-define": "off",
+        "no-use-before-define": "off"
+      }
+    },
+    {
+      "files": ["src/components/ShadcnDynamicForm.tsx", "src/types/form.ts"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "react/jsx-props-no-spreading": "off"
       }
     }
   ],

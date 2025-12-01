@@ -8,11 +8,10 @@ import {
   FieldPath,
   FieldValues,
   DefaultValues,
+  Resolver,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import Link from "next/link";
-
 import { Button } from "./ui/button";
 import {
   Form,
@@ -32,10 +31,56 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
-
 import { DynamicFormProps, FormField } from "../types/form";
 
-export default function ShadcnDynamicForm<T extends z.ZodSchema<FieldValues>>({
+function renderFieldControl(
+  field: FormField,
+  formField: any,
+  loading: boolean,
+) {
+  switch (field.type) {
+    case "select":
+      return (
+        <Select
+          onValueChange={formField.onChange}
+          defaultValue={formField.value}
+          disabled={loading}
+        >
+          <SelectTrigger>
+            <SelectValue
+              placeholder={field.placeholder || `Select a ${field.label}`}
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {field.options?.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    case "textarea":
+      return (
+        <Textarea
+          placeholder={field.placeholder}
+          {...formField}
+          disabled={loading}
+        />
+      );
+    default:
+      return (
+        <Input
+          type={field.type}
+          placeholder={field.placeholder}
+          {...formField}
+          disabled={loading}
+        />
+      );
+  }
+}
+
+export default function ShadcnDynamicForm<T extends FieldValues>({
   schema,
   fields,
   onSubmit,
@@ -46,8 +91,8 @@ export default function ShadcnDynamicForm<T extends z.ZodSchema<FieldValues>>({
   linkText,
   linkHref,
 }: DynamicFormProps<T>) {
-  const form = useForm<z.infer<T>>({
-    resolver: zodResolver<z.infer<T>, any, z.infer<T>>(schema),
+  const form = useForm<T>({
+    resolver: zodResolver(schema as any) as Resolver<T>,
     defaultValues: Object.fromEntries(
       fields.map((field) => {
         switch (field.type) {
@@ -64,7 +109,7 @@ export default function ShadcnDynamicForm<T extends z.ZodSchema<FieldValues>>({
             return [field.name, ""];
         }
       }),
-    ) as DefaultValues<z.infer<T>>,
+    ) as DefaultValues<T>,
   });
 
   return (
@@ -73,68 +118,18 @@ export default function ShadcnDynamicForm<T extends z.ZodSchema<FieldValues>>({
         <h2 className="text-3xl font-bold text-center text-gray-900">
           {formTitle}
         </h2>
-        {/* eslint-disable-next-line react/jsx-props-no-spreading */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {fields.map((field: FormField) => (
               <ShadcnFormField
                 key={field.name}
                 control={form.control}
-                name={field.name as FieldPath<z.infer<T>>}
+                name={field.name as FieldPath<T>}
                 render={({ field: formField }) => (
                   <FormItem>
                     <FormLabel>{field.label}</FormLabel>
                     <FormControl>
-                      {(() => {
-                        switch (field.type) {
-                          case "select":
-                            return (
-                              <Select
-                                onValueChange={formField.onChange}
-                                defaultValue={formField.value}
-                                disabled={loading}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue
-                                    placeholder={
-                                      field.placeholder ||
-                                      `Select a ${field.label}`
-                                    }
-                                  />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {field.options?.map((option) => (
-                                    <SelectItem
-                                      key={option.value}
-                                      value={option.value}
-                                    >
-                                      {option.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            );
-                          case "textarea":
-                            // eslint-disable-next-line react/jsx-props-no-spreading
-                            return (
-                              <Textarea
-                                placeholder={field.placeholder}
-                                {...formField}
-                                disabled={loading}
-                              />
-                            );
-                          default:
-                            // eslint-disable-next-line react/jsx-props-no-spreading
-                            return (
-                              <Input
-                                type={field.type}
-                                placeholder={field.placeholder}
-                                {...formField}
-                                disabled={loading}
-                              />
-                            );
-                        }
-                      })()}
+                      {renderFieldControl(field, formField, loading)}
                     </FormControl>
                     {field.description && (
                       <FormDescription>{field.description}</FormDescription>
