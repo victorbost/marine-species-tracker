@@ -1,3 +1,5 @@
+// frontend/src/app/AppContent.tsx
+
 "use client";
 
 import React from "react";

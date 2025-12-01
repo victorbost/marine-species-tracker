@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useUser } from "../../components/UserProvider";
 import ShadcnDynamicForm from "../../components/ShadcnDynamicForm";
 import { FormField } from "../../types/form";
+import { useLoading } from "../../hooks/useLoading"; // Import the global loading hook
 
 const signinSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -14,9 +15,9 @@ const signinSchema = z.object({
 
 export default function SigninPage() {
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { refetchUser } = useUser();
+  const { startLoading, stopLoading, isLoading } = useLoading(); // Use global loading state and functions
 
   const signinFields: FormField[] = [
     {
@@ -35,7 +36,7 @@ export default function SigninPage() {
 
   const handleSignin = useCallback(
     async (values: z.infer<typeof signinSchema>) => {
-      setLoading(true);
+      startLoading();
       setError("");
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -62,10 +63,10 @@ export default function SigninPage() {
         console.error("Network error during sign in:", err); // eslint-disable-line no-console
         setError("Network error. Please try again.");
       } finally {
-        setLoading(false);
+        stopLoading();
       }
     },
-    [setLoading, setError, refetchUser, router],
+    [setError, refetchUser, router, startLoading, stopLoading], // Add startLoading and stopLoading to dependencies
   );
 
   return (
@@ -76,7 +77,7 @@ export default function SigninPage() {
       submitButtonText="Sign In"
       formTitle="Welcome Back"
       error={error}
-      loading={loading}
+      loading={isLoading}
       linkText="Don't have an account yet?"
       linkHref="/sign-up"
     />
