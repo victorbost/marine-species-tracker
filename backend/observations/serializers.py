@@ -11,10 +11,13 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
         fields = (
             "id",
             "species_name",
+            "common_name",
             "observation_datetime",
             "location",
             "location_name",
-            "depth",
+            "depth_min",
+            "depth_max",
+            "bathymetry",
             "temperature",
             "image",
             "visibility",
@@ -22,9 +25,9 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
             "validated",
             "source",
             "user",
+            "sex",
         )
-        read_only_fields = ("user", "source", "validated")
-
+    read_only_fields = ("user", "source", "validated", "created_at", "updated_at")
     def update(self, instance, validated_data):
         request = self.context.get("request")
         user = getattr(request, "user", None)
