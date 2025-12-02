@@ -16,9 +16,8 @@ class ObservationListCreateView(generics.ListCreateAPIView):
     bbox_filter_field = "location"
 
     def get_queryset(self):
-        return Observation.objects.filter(user=self.request.user).order_by(
-            "id"
-        )
+        # This filters observations to only show those belonging to the requesting user
+        return Observation.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

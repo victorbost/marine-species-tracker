@@ -28,12 +28,15 @@ class Observation(TimeStampedModel, models.Model):
         blank=False,
     )
     species_name = models.CharField(max_length=100, null=False, blank=False)
+    common_name = models.CharField(max_length=255, blank=True, null=True)
     location = gis_models.PointField(geography=True, null=False, blank=False)
     observation_datetime = models.DateTimeField(null=False, blank=False)
     location_name = models.CharField(max_length=255)
-    depth = models.FloatField()
-    temperature = models.FloatField()
-    visibility = models.FloatField()
+    depth_min = models.FloatField(blank=True, null=True)
+    depth_max = models.FloatField(blank=True, null=True)
+    bathymetry = models.FloatField(blank=True, null=True)
+    temperature = models.FloatField(blank=True, null=True)
+    visibility = models.FloatField(blank=True, null=True)
     notes = models.TextField(blank=True)
     image = models.ImageField(
         upload_to="observation_pics/",
@@ -58,11 +61,23 @@ class Observation(TimeStampedModel, models.Model):
         ("obis", "OBIS"),
         ("other", "Other External"),
     ]
+    SEX_CHOICES = [
+        ("male", "Male"),
+        ("female", "Female"),
+        ("unknown", "Unknown"),
+    ]
     validated = models.CharField(
         max_length=10, choices=VALIDATION_STATUS, default="pending"
     )
     source = models.CharField(
         max_length=32, choices=SOURCE_CHOICES, default="user"
+    )
+    sex = models.CharField(
+        max_length=10,
+        choices=SEX_CHOICES,
+        default="unknown",
+        blank=True,
+        null=True,
     )
 
     def save(self, *args, **kwargs):
