@@ -39,3 +39,13 @@ export async function fetchUserObservations(): Promise<Observation[]> {
     throw error;
   }
 }
+
+export async function deleteObservation(observationId: number): Promise<void> {
+  try {
+    await api.delete(`v1/observations/${observationId}/`);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Error deleting observation ${observationId}:`, error);
+    throw error;
+  }
+}
