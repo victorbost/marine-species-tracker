@@ -3,7 +3,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -11,7 +11,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Badge } from "./ui/badge";
 import { useUser } from "./UserProvider";
 import { ObservationCard } from "./ObservationCard";
-import { fetchUserObservations } from "../lib/observation";
+import { fetchUserObservations, deleteObservation } from "../lib/observation";
 import { Observation } from "../types/observation";
 import Loader from "./Loader";
 
@@ -28,6 +28,7 @@ const renderObservationListContent = (
   error: string | null,
   observations: Observation[],
   onSelectObservation: (observation: Observation) => void,
+  onDeleteObservation: (observationId: number) => void,
 ) => {
   if (isLoading) {
     return <Loader isLoading />;
@@ -45,6 +46,7 @@ const renderObservationListContent = (
       key={observation.id}
       observation={observation}
       onSelectObservation={onSelectObservation}
+      onDeleteObservation={onDeleteObservation}
     />
   ));
 };
@@ -57,33 +59,51 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
   const [selectedObservation, setSelectedObservation] =
     useState<Observation | null>(null);
 
+  const loadObservations = useCallback(async () => {
+    if (!user) {
+      setIsLoading(false);
+      setObservations([]);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const userObservations = await fetchUserObservations();
+      setObservations(userObservations);
+    } catch (err) {
+      const errorMessage = "Failed to load observations.";
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
-    const loadObservations = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-      try {
-        const userObservations = await fetchUserObservations();
-        setObservations(userObservations);
-      } catch (err) {
-        const errorMessage = "Failed to load observations.";
-        setError(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     if (!isUserLoading) {
       loadObservations();
     }
-  }, [user, isUserLoading]);
+  }, [loadObservations, isUserLoading]);
 
   const handleSelectObservation = (observation: Observation) => {
     setSelectedObservation(observation);
+  };
+
+  const handleDeleteObservation = async (observationId: number) => {
+    if (!user) {
+      // User not logged in, handle accordingly (e.g., redirect to login)
+      console.warn("User not logged in. Cannot delete observation."); // eslint-disable-line no-console
+      return;
+    }
+    try {
+      await deleteObservation(observationId);
+      // Refresh the list of observations after successful deletion
+      await loadObservations();
+    } catch (err) {
+      // Handle error, e.g., show a toast notification
+      console.error("Failed to delete observation:", err); // eslint-disable-line no-console
+      setError("Failed to delete observation.");
+    }
   };
 
   if (isUserLoading) {
@@ -138,6 +158,7 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
                 error,
                 observations,
                 handleSelectObservation,
+                handleDeleteObservation,
               )}
             </ScrollArea>
           </CardContent>

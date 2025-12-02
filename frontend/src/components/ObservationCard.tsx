@@ -2,16 +2,19 @@ import React from "react";
 import Image from "next/image";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
 import { Observation } from "../types/observation";
 
 interface ObservationCardProps {
   observation: Observation;
   onSelectObservation: (observation: Observation) => void;
+  onDeleteObservation: (observationId: number) => void;
 }
 
 function ObservationCard({
   observation,
   onSelectObservation,
+  onDeleteObservation,
 }: ObservationCardProps) {
   return (
     <Card
@@ -79,6 +82,28 @@ function ObservationCard({
               Source: {observation.source}
             </p>
           </div>
+        </div>
+        <div className="flex justify-end space-x-2 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectObservation(observation);
+            }}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteObservation(observation.id);
+            }}
+          >
+            Delete
+          </Button>
         </div>
       </CardContent>
     </Card>
