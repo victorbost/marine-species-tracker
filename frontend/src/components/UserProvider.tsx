@@ -92,7 +92,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     });
     setUser(null);
     router.push("/sign-in");
-  }, [router]); // Dependencies for logout
+  }, [router]);
 
   const contextValue = useMemo(
     () => ({ user, loading, refetchUser, logout }),
