@@ -23,7 +23,6 @@ const DynamicMapComponent = dynamic(() => import("./MapComponent"), {
   ssr: false,
 });
 
-// Helper function to render observation list content
 const renderObservationListContent = (
   isLoading: boolean,
   error: string | null,
@@ -55,7 +54,8 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
   const [observations, setObservations] = useState<Observation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedObservation, setSelectedObservation] = useState<Observation | null>(null);
+  const [selectedObservation, setSelectedObservation] =
+    useState<Observation | null>(null);
 
   useEffect(() => {
     const loadObservations = async () => {
@@ -82,9 +82,8 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
     }
   }, [user, isUserLoading]);
 
-  const handleSelectObservation = (observation: Observation) => { // New callback
+  const handleSelectObservation = (observation: Observation) => {
     setSelectedObservation(observation);
-    // Optionally, you could add logic here to scroll the map into view if needed
   };
 
   if (isUserLoading) {
@@ -118,7 +117,7 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
           style={{ position: "relative" }}
           className="h-full bg-white rounded-lg overflow-hidden"
         >
-          <DynamicMapComponent selectedObservation={selectedObservation} /> {/* Pass selectedObservation */}
+          <DynamicMapComponent selectedObservation={selectedObservation} />
           {/* <div className="absolute bottom-4 left-4 z-10">
             <Button>+ Add Observation</Button>
           </div> */}
@@ -134,7 +133,12 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
           </CardHeader>
           <CardContent className="flex-grow overflow-hidden">
             <ScrollArea className="h-full pr-4">
-              {renderObservationListContent(isLoading, error, observations, handleSelectObservation)}
+              {renderObservationListContent(
+                isLoading,
+                error,
+                observations,
+                handleSelectObservation,
+              )}
             </ScrollArea>
           </CardContent>
         </Card>

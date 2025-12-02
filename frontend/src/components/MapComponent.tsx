@@ -32,7 +32,10 @@ const yellowIcon = L.divIcon({
 });
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-export default function MapComponent({ selectedObservation }: MapComponentProps) { // Make sure selectedObservation is destructured
+export default function MapComponent({
+  selectedObservation,
+}: MapComponentProps) {
+  // Make sure selectedObservation is destructured
   const defaultPosition: [number, number] = [0, 0];
   const [observations, setObservations] = useState<GeoJsonFeature[]>([]);
   const [isMounted, setIsMounted] = useState(false);
@@ -42,10 +45,9 @@ export default function MapComponent({ selectedObservation }: MapComponentProps)
   useEffect(() => {
     if (mapRef.current && selectedObservation) {
       const [lng, lat] = selectedObservation.location.coordinates;
-      mapRef.current.flyTo([lat, lng], 10);
-
-      }
-    }, [selectedObservation]);
+      mapRef.current.flyTo([lat, lng], 6);
+    }
+  }, [selectedObservation]);
 
   useEffect(() => {
     setIsMounted(true);

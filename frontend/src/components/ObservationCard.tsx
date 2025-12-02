@@ -6,12 +6,18 @@ import { Observation } from "../types/observation";
 
 interface ObservationCardProps {
   observation: Observation;
-  onSelectObservation: (observation: Observation) => void; // Added new prop
+  onSelectObservation: (observation: Observation) => void;
 }
 
-function ObservationCard({ observation, onSelectObservation }: ObservationCardProps) {
+function ObservationCard({
+  observation,
+  onSelectObservation,
+}: ObservationCardProps) {
   return (
-    <Card className="w-full max-w-sm">
+    <Card
+      className="w-full max-w-sm cursor-pointer hover:shadow-lg transition-shadow duration-200"
+      onClick={() => onSelectObservation(observation)}
+    >
       <CardHeader>
         <CardTitle>{observation.speciesName}</CardTitle>
         {observation.commonName && (
