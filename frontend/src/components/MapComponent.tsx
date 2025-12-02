@@ -21,8 +21,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 export default function MapComponent() {
   const defaultPosition: [number, number] = [0, 0];
   const [observations, setObservations] = useState<GeoJsonFeature[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const fetchObservations = async () => {
       try {
         const response = await fetch(
@@ -44,12 +46,16 @@ export default function MapComponent() {
     fetchObservations();
   }, []);
 
+  if (!isMounted) {
+    return null;
+  }
+
   return (
     <MapContainer
       center={defaultPosition}
       zoom={2}
       scrollWheelZoom
-      style={{ height: "500px", width: "100%" }}
+      className="h-full w-full"
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

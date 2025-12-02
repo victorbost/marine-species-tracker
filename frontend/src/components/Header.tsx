@@ -16,12 +16,15 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-md py-4">
+    <header className="bg-dark shadow-md py-4">
       <div className="container mx-auto px-4 flex justify-between items-center">
         <div className="flex flex-col">
-          <h1 className="text-3xl font-bold text-blue-900">
-            Marine Species Tracker
+          <h1 className="text-2xl font-bold text-center text-blue-900 mb-2">
+            🌊 Marine Species Observation Tracker
           </h1>
+          <p className="text-xl text-blue-700 mb-2">
+            Empower divers, biologists, and hobbyists...
+          </p>
           {loading && <p className="text-sm text-gray-600">Loading user...</p>}
           {!loading && user && (
             <p className="text-sm text-gray-600">Welcome, {user.username}</p>
