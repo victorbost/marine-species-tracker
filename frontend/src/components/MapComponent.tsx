@@ -9,6 +9,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { GeoJsonFeature, GeoJsonFeatureCollection } from "../types/geojson";
 
 import { Observation } from "../types/observation";
+import { fetchMapObservations } from "../lib/observation"; // Import the new function
 
 interface MapComponentProps {
   selectedObservation: Observation | null;
@@ -34,13 +35,15 @@ const yellowIcon = L.divIcon({
   popupAnchor: [0, -8], // Point from which the popup should open relative to the iconAnchor
 });
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"; // Keep if still used elsewhere, otherwise can be removed
 export default function MapComponent({
   selectedObservation,
   zIndex,
   zoomTrigger,
   mapRefreshTrigger, // Destructure the new prop
 }: MapComponentProps) {
+  console.log("MapComponent rendered. Received mapRefreshTrigger:", mapRefreshTrigger); // eslint-disable-line no-console
+
   // Make sure selectedObservation is destructured
   const defaultPosition: [number, number] = [0, 0];
   const [observations, setObservations] = useState<GeoJsonFeature[]>([]);
@@ -55,28 +58,22 @@ export default function MapComponent({
     }
   }, [selectedObservation, zoomTrigger]);
 
-  const fetchObservations = useCallback(async () => {
+  const loadMapObservations = useCallback(async () => { // Renamed for clarity
+    console.log("loadMapObservations function called."); // eslint-disable-line no-console
     try {
-      const response = await fetch(
-        `${API_URL}/api/v1/map/observations/?lat=0&lng=0&radius=10000`,
-        {
-          credentials: "include",
-        },
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data: GeoJsonFeatureCollection = await response.json();
+      const data = await fetchMapObservations(); // Use the new lib function
+      console.log("Fetched observations data:", data.features); // eslint-disable-line no-console
       setObservations(data.features);
     } catch (error) {
-      console.error("Failed to fetch observations:", error); // eslint-disable-line no-console
+      console.error("Failed to fetch observations for map:", error); // eslint-disable-line no-console
     }
-  }, []); // Empty dependency array, as API_URL is a constant
+  }, []);  // Empty dependency array because fetchMapObservations doesn't depend on local state/props
 
   useEffect(() => {
+    console.log("MapComponent useEffect for data fetching is running. mapRefreshTrigger:", mapRefreshTrigger); // eslint-disable-line no-console
     setIsMounted(true);
-    fetchObservations();
-  }, [fetchObservations, mapRefreshTrigger]); // Add mapRefreshTrigger as a dependency
+    loadMapObservations(); // Call the new load function
+  }, [loadMapObservations, mapRefreshTrigger]); // Add mapRefreshTrigger as a dependency
 
   if (!isMounted) {
     return null;
@@ -98,6 +95,8 @@ export default function MapComponent({
       {observations &&
         observations.length > 0 &&
         observations.map((feature) => {
+          console.log("Rendering marker for feature ID:", feature.id, "Species:", feature.properties.speciesName); // eslint-disable-line no-console
+
           const [lng, lat] = feature.geometry.coordinates;
           const {
             speciesName,

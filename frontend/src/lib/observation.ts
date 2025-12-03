@@ -101,12 +101,11 @@ export async function createObservation(
 
 export async function fetchMapObservations(): Promise<GeoJsonFeatureCollection> {
   try {
-    const response = await api.get<PaginatedGeoJsonFeatures>( // Assuming map endpoint returns PaginatedGeoJsonFeatures
+    // The map endpoint returns GeoJsonFeatureCollection directly, not PaginatedGeoJsonFeatures
+    const response = await api.get<GeoJsonFeatureCollection>(
       "v1/map/observations/?lat=0&lng=0&radius=10000",
     );
-    // The map endpoint typically returns a GeoJsonFeatureCollection directly,
-    // but if it's wrapped in PaginatedGeoJsonFeatures, we extract features.
-    return response.data.results; // Assuming data structure matches PaginatedGeoJsonFeatures
+    return response.data; // Return the data directly
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error("Error fetching map observations:", error);
