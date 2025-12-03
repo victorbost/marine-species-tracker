@@ -7,19 +7,19 @@ export async function fetchUserObservations(): Promise<Observation[]> {
     // The API response is a PaginatedGeoJsonFeatures
     const response =
       await api.get<PaginatedGeoJsonFeatures>("v1/observations/");
-    const geoJsonFeatures = response.data.results.features; // Directly access the array of features
+    const geoJsonFeatures = response.data.results.features;
 
     // Map the GeoJSON features into the frontend's Observation type
     const observations: Observation[] = geoJsonFeatures.map((feature) => ({
       id: feature.id,
       user: feature.properties.user,
-      speciesName: feature.properties.species_name,
-      commonName: feature.properties.common_name ?? null,
+      speciesName: feature.properties.speciesName,
+      commonName: feature.properties.commonName ?? null,
       location: feature.geometry,
-      observationDatetime: feature.properties.observation_datetime,
-      locationName: feature.properties.location_name,
-      depthMin: feature.properties.depth_min ?? null,
-      depthMax: feature.properties.depth_max ?? null,
+      observationDatetime: feature.properties.observationDatetime,
+      locationName: feature.properties.locationName,
+      depthMin: feature.properties.depthMin ?? null,
+      depthMax: feature.properties.depthMax ?? null,
       bathymetry: feature.properties.bathymetry ?? null,
       temperature: feature.properties.temperature,
       visibility: feature.properties.visibility,
@@ -46,6 +46,26 @@ export async function deleteObservation(observationId: number): Promise<void> {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(`Error deleting observation ${observationId}:`, error);
+    throw error;
+  }
+}
+
+export async function updateObservation(
+  observationId: number,
+  observationData: Partial<Observation>,
+): Promise<Observation> {
+  try {
+    const response = await api.patch<Observation>(
+      `v1/observations/${observationId}/`,
+      observationData,
+    );
+    return response.data;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `observation.ts (updateObservation): Error updating observation ${observationId}:`,
+      error,
+    );
     throw error;
   }
 }

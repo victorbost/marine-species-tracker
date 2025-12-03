@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework_gis.filters import InBBoxFilter
 
 from .models import Observation
-from .permissions import IsAdminOrResearcher
+from .permissions import IsAdminOrResearcher, IsOwnerOrAdminOrResearcher
 from .serializers import ObservationGeoSerializer
 
 
@@ -27,7 +27,10 @@ class ObservationListCreateView(generics.ListCreateAPIView):
 class ObservationDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Observation.objects.all()
     serializer_class = ObservationGeoSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsOwnerOrAdminOrResearcher,
+    ]
 
     def get_queryset(self):
         # Only allow the owner (or admin/researcher) to view/update/delete

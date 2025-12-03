@@ -1,6 +1,6 @@
 // frontend/src/types/form.ts
 import { z } from "zod";
-import { FieldValues } from "react-hook-form";
+import { DefaultValues, FieldValues } from "react-hook-form";
 
 export type ShadcnFormFieldType =
   | "text"
@@ -9,6 +9,7 @@ export type ShadcnFormFieldType =
   | "select"
   | "number"
   | "date"
+  | "datetime-local"
   | "textarea";
 
 export interface FormFieldOption {
@@ -23,6 +24,7 @@ export interface FormField {
   placeholder?: string;
   description?: string;
   options?: FormFieldOption[];
+  optional?: boolean;
 }
 
 export interface DynamicFormProps<T extends FieldValues> {
@@ -31,8 +33,9 @@ export interface DynamicFormProps<T extends FieldValues> {
   onSubmit: (values: T) => Promise<void>;
   submitButtonText: string;
   formTitle: string;
-  error?: string;
+  error?: string | null;
   loading?: boolean;
   linkText?: string;
   linkHref?: string;
+  defaultValues?: DefaultValues<T>;
 }

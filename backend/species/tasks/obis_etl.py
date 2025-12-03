@@ -224,7 +224,7 @@ def trigger_full_obis_refresh(
 
     total_records = 0
     total_pages = 0
-    current_page = 0
+    # current_page = 0
     page_size = obis_client.default_size
 
     # First, make a call to get the total number of records

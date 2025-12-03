@@ -90,27 +90,37 @@ export default function ShadcnDynamicForm<T extends FieldValues>({
   loading = false,
   linkText,
   linkHref,
+  defaultValues,
 }: DynamicFormProps<T>) {
   const form = useForm<T>({
     resolver: zodResolver(schema as any) as Resolver<T>,
-    defaultValues: Object.fromEntries(
-      fields.map((field) => {
-        switch (field.type) {
-          case "number":
-            return [field.name, undefined];
-          case "date":
-            return [field.name, undefined];
-          case "select":
-          case "text":
-          case "email":
-          case "password":
-          case "textarea":
-          default:
-            return [field.name, ""];
-        }
-      }),
-    ) as DefaultValues<T>,
+    defaultValues:
+      defaultValues ||
+      (Object.fromEntries(
+        // Use defaultValues if provided
+        fields.map((field) => {
+          switch (field.type) {
+            case "number":
+              return [field.name, undefined];
+            case "date":
+              return [field.name, undefined];
+            case "select":
+            case "text":
+            case "email":
+            case "password":
+            case "textarea":
+            default:
+              return [field.name, ""];
+          }
+        }),
+      ) as DefaultValues<T>),
   });
+
+  React.useEffect(() => {
+    if (defaultValues) {
+      form.reset(defaultValues);
+    }
+  }, [defaultValues, form]);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
