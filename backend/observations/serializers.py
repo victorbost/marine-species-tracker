@@ -37,7 +37,9 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
     bathymetry = serializers.FloatField(allow_null=True, required=False)
     temperature = serializers.FloatField(allow_null=True, required=False)
     visibility = serializers.FloatField(allow_null=True, required=False)
-    notes = serializers.CharField(allow_blank=True, required=False)
+    notes = serializers.CharField(
+        allow_blank=True, required=False, allow_null=True
+    )
     sex = serializers.ChoiceField(
         choices=Observation.SEX_CHOICES, allow_null=True, required=False
     )
@@ -73,6 +75,9 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
         "updated_at",
         "image",
     )
+
+    def create(self, validated_data):
+        return super().create(validated_data)
 
     def update(self, instance, validated_data):
         request = self.context.get("request")

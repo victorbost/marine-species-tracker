@@ -15,6 +15,8 @@ import { ObservationCard } from "./ObservationCard";
 import { fetchUserObservations, deleteObservation } from "../lib/observation";
 import { Observation } from "../types/observation";
 import Loader from "./Loader";
+import { Button } from "./ui/button"; // Import Button
+import AddObservationModal from "./AddObservationModal"; // Import AddObservationModal
 
 interface UserObservationSectionProps {
   className?: string;
@@ -56,13 +58,15 @@ const renderObservationListContent = (
 
 function UserObservationSection({ className }: UserObservationSectionProps) {
   const { user, loading: isUserLoading } = useUser();
-  const [observations, setObservations] = useState<Observation[]>([]);
+  const [observations, setObservations] = useState<Observation[]>([]); // This state holds the observations for both the list and the map
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedObservation, setSelectedObservation] =
     useState<Observation | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [zoomTrigger, setZoomTrigger] = useState(0);
+  const [mapRefreshTrigger, setMapRefreshTrigger] = useState(0); // New state for map refresh
 
   const loadObservations = useCallback(async () => {
     if (!user) {
@@ -132,9 +136,17 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
 
   const handleObservationUpdated = () => {
     loadObservations(); // Refresh observations after update
+    setMapRefreshTrigger((prev) => prev + 1);
     // If the map is showing the updated observation, you might want to re-zoom or just let it be.
     // Since selectedObservation is still set, the MapComponent's useEffect will handle the zoom if needed.
   };
+
+  const handleObservationCreated = async () => {
+    await loadObservations(); // Refresh observations after creation
+    setIsAddModalOpen(false); // Close the add modal
+    setMapRefreshTrigger((prev) => prev + 1);
+  };
+
 
   if (isUserLoading) {
     return (
@@ -171,10 +183,11 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
             selectedObservation={selectedObservation}
             zIndex={isEditModalOpen ? 0 : 1}
             zoomTrigger={zoomTrigger}
+            mapRefreshTrigger={mapRefreshTrigger}
           />
-          {/* <div className="absolute bottom-4 left-4 z-10">
-            <Button>+ Add Observation</Button>
-          </div> */}
+          <div className="absolute top-4 right-4 z-[1000] p-2 pointer-events-auto" style={{ display: "flex", gap: 8 }}>
+            <Button onClick={() => setIsAddModalOpen(true)}>Add Observation</Button>
+          </div>
         </div>
       </div>
       <div className="md:col-span-1 h-full flex flex-col overflow-hidden">
@@ -204,6 +217,11 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
         onClose={handleCloseEditModal}
         observation={selectedObservation}
         onObservationUpdated={handleObservationUpdated}
+      />
+      <AddObservationModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onObservationCreated={handleObservationCreated}
       />
     </div>
   );

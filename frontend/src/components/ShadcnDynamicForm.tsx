@@ -51,7 +51,7 @@ function renderFieldControl(
               placeholder={field.placeholder || `Select a ${field.label}`}
             />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper" className="z-[9999]">
             {field.options?.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}

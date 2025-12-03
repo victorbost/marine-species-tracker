@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_gis.filters import InBBoxFilter
@@ -15,11 +15,24 @@ class ObservationListCreateView(generics.ListCreateAPIView):
     filter_backends = (InBBoxFilter,)
     bbox_filter_field = "location"
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid(
+            raise_exception=False
+        ):  # Crucially, set raise_exception to False
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # If valid, proceed with saving (which will call perform_create)
+        return super().create(request, *args, **kwargs)
+
     def get_queryset(self):
-        # This filters observations to only show those belonging to the requesting user
         return Observation.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
+        # This perform_create will now only be called if serializer.is_valid() was true above.
+        # So we can remove the print statement here.
         serializer.save(user=self.request.user)
 
 

@@ -2,6 +2,20 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+function getCsrfToken() {
+  const name = "csrftoken";
+  if (typeof document === "undefined") {
+    return null;
+  }
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    const cookieValue = parts.pop()?.split(";").shift();
+    return cookieValue;
+  }
+  return null;
+}
+
 export const api = axios.create({
   baseURL: `${API_URL}/api`,
   headers: {
@@ -9,6 +23,19 @@ export const api = axios.create({
   },
   withCredentials: true,
 });
+
+api.interceptors.request.use(
+  (config) => {
+    const csrfToken = getCsrfToken();
+    if (csrfToken) {
+      config.headers["X-CSRFToken"] = csrfToken;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
 // Store state for managing token refresh and preventing race conditions
 let isRefreshing = false;

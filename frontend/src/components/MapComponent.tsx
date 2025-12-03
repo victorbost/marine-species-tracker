@@ -5,7 +5,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { GeoJsonFeature, GeoJsonFeatureCollection } from "../types/geojson";
 
 import { Observation } from "../types/observation";
@@ -14,6 +14,7 @@ interface MapComponentProps {
   selectedObservation: Observation | null;
   zIndex?: number;
   zoomTrigger: number;
+  mapRefreshTrigger: number; // New prop for triggering refresh
 }
 
 // Create a custom blue circle icon using L.divIcon
@@ -38,6 +39,7 @@ export default function MapComponent({
   selectedObservation,
   zIndex,
   zoomTrigger,
+  mapRefreshTrigger, // Destructure the new prop
 }: MapComponentProps) {
   // Make sure selectedObservation is destructured
   const defaultPosition: [number, number] = [0, 0];
@@ -53,28 +55,28 @@ export default function MapComponent({
     }
   }, [selectedObservation, zoomTrigger]);
 
+  const fetchObservations = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/v1/map/observations/?lat=0&lng=0&radius=10000`,
+        {
+          credentials: "include",
+        },
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data: GeoJsonFeatureCollection = await response.json();
+      setObservations(data.features);
+    } catch (error) {
+      console.error("Failed to fetch observations:", error); // eslint-disable-line no-console
+    }
+  }, []); // Empty dependency array, as API_URL is a constant
+
   useEffect(() => {
     setIsMounted(true);
-    const fetchObservations = async () => {
-      try {
-        const response = await fetch(
-          `${API_URL}/api/v1/map/observations/?lat=0&lng=0&radius=10000`,
-          {
-            credentials: "include",
-          },
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data: GeoJsonFeatureCollection = await response.json();
-        setObservations(data.features);
-      } catch (error) {
-        console.error("Failed to fetch observations:", error); // eslint-disable-line no-console
-      }
-    };
-
     fetchObservations();
-  }, []);
+  }, [fetchObservations, mapRefreshTrigger]); // Add mapRefreshTrigger as a dependency
 
   if (!isMounted) {
     return null;

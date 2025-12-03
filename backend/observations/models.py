@@ -37,7 +37,7 @@ class Observation(TimeStampedModel, models.Model):
     bathymetry = models.FloatField(blank=True, null=True)
     temperature = models.FloatField(blank=True, null=True)
     visibility = models.FloatField(blank=True, null=True)
-    notes = models.TextField(blank=True)
+    notes = models.TextField(blank=True, null=True)
     image = models.ImageField(
         upload_to="observation_pics/",
         null=True,
