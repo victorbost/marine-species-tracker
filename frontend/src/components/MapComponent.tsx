@@ -12,6 +12,7 @@ import { Observation } from "../types/observation";
 
 interface MapComponentProps {
   selectedObservation: Observation | null;
+  zIndex?: number;
 }
 
 // Create a custom blue circle icon using L.divIcon
@@ -34,6 +35,7 @@ const yellowIcon = L.divIcon({
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 export default function MapComponent({
   selectedObservation,
+  zIndex,
 }: MapComponentProps) {
   // Make sure selectedObservation is destructured
   const defaultPosition: [number, number] = [0, 0];
@@ -45,7 +47,7 @@ export default function MapComponent({
   useEffect(() => {
     if (mapRef.current && selectedObservation) {
       const [lng, lat] = selectedObservation.location.coordinates;
-      mapRef.current.flyTo([lat, lng], 6);
+      mapRef.current.flyTo([lat, lng], 4);
     }
   }, [selectedObservation]);
 
@@ -82,6 +84,7 @@ export default function MapComponent({
       zoom={2}
       scrollWheelZoom
       className="h-full w-full"
+      style={{ zIndex }}
       ref={mapRef}
     >
       <TileLayer

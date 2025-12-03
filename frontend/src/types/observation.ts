@@ -12,8 +12,8 @@ export interface Observation {
   depthMin: number | null;
   depthMax: number | null;
   bathymetry: number | null;
-  temperature: number;
-  visibility: number;
+  temperature: number | null;
+  visibility: number | null;
   notes: string | null;
   image: string | null; // URL to the image
   validated: "pending" | "validated" | "rejected";

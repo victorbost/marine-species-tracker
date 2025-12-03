@@ -5,18 +5,55 @@ from .models import Observation
 
 
 class ObservationGeoSerializer(GeoFeatureModelSerializer):
+    # Explicitly define fields that should be writable
+    speciesName = serializers.CharField(source="species_name", max_length=100)
+    commonName = serializers.CharField(
+        source="common_name", max_length=255, allow_null=True, required=False
+    )
+    locationName = serializers.CharField(
+        source="location_name", max_length=255
+    )
+    observationDatetime = serializers.DateTimeField(
+        source="observation_datetime",
+        format="%Y-%m-%dT%H:%M:%SZ",
+        input_formats=[
+            "%Y-%m-%dT%H:%M",  # For datetime-local input without seconds
+            "%Y-%m-%dT%H:%M:%SZ",  # For ISO without milliseconds
+            "%Y-%m-%dT%H:%M:%S.%fZ",  # **FIX: For ISO with milliseconds and Z (UTC)**
+            "%Y-%m-%dT%H:%M:%S.%f",  # For ISO with milliseconds, no Z (local/naive)
+            "%Y-%m-%dT%H:%M:%S",  # For ISO without milliseconds and Z
+        ],
+        write_only=False,
+        allow_null=False,
+        required=True,
+    )
+    depthMin = serializers.FloatField(
+        source="depth_min", allow_null=True, required=False
+    )
+    depthMax = serializers.FloatField(
+        source="depth_max", allow_null=True, required=False
+    )
+
+    bathymetry = serializers.FloatField(allow_null=True, required=False)
+    temperature = serializers.FloatField(allow_null=True, required=False)
+    visibility = serializers.FloatField(allow_null=True, required=False)
+    notes = serializers.CharField(allow_blank=True, required=False)
+    sex = serializers.ChoiceField(
+        choices=Observation.SEX_CHOICES, allow_null=True, required=False
+    )
+
     class Meta:
         model = Observation
         geo_field = "location"
         fields = (
             "id",
-            "species_name",
-            "common_name",
-            "observation_datetime",
+            "speciesName",
+            "commonName",
+            "observationDatetime",
             "location",
-            "location_name",
-            "depth_min",
-            "depth_max",
+            "locationName",
+            "depthMin",
+            "depthMax",
             "bathymetry",
             "temperature",
             "image",
@@ -27,7 +64,16 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
             "user",
             "sex",
         )
-    read_only_fields = ("user", "source", "validated", "created_at", "updated_at")
+
+    read_only_fields = (
+        "user",
+        "source",
+        "validated",
+        "created_at",
+        "updated_at",
+        "image",
+    )
+
     def update(self, instance, validated_data):
         request = self.context.get("request")
         user = getattr(request, "user", None)
@@ -42,4 +88,7 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
                         "You do not have permission to validate observations."
                     )
                 })
-        return super().update(instance, validated_data)
+        updated_instance = super().update(instance, validated_data)
+        updated_instance.save()
+
+        return updated_instance

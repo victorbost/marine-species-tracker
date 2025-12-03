@@ -1,13 +1,13 @@
 export interface GeoJsonFeatureProperties {
   id: number;
-  species_name: string;
-  common_name?: string;
-  observation_datetime: string;
-  location_name: string;
+  speciesName: string;
+  commonName?: string;
+  observationDatetime: string;
+  locationName: string;
   source: "user" | "obis" | "other";
 
-  depth_min: number | null;
-  depth_max: number | null;
+  depthMin: number | null;
+  depthMax: number | null;
   bathymetry: number | null;
   temperature: number;
   visibility: number;

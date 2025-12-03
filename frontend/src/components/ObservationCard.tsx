@@ -9,12 +9,14 @@ interface ObservationCardProps {
   observation: Observation;
   onSelectObservation: (observation: Observation) => void;
   onDeleteObservation: (observationId: number) => void;
+  onEditObservationClick: (observation: Observation) => void;
 }
 
 function ObservationCard({
   observation,
   onSelectObservation,
   onDeleteObservation,
+  onEditObservationClick,
 }: ObservationCardProps) {
   return (
     <Card
@@ -89,7 +91,7 @@ function ObservationCard({
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              onSelectObservation(observation);
+              onEditObservationClick(observation);
             }}
           >
             Edit
