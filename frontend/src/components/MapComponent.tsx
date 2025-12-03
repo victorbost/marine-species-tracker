@@ -13,6 +13,7 @@ import { Observation } from "../types/observation";
 interface MapComponentProps {
   selectedObservation: Observation | null;
   zIndex?: number;
+  zoomTrigger: number;
 }
 
 // Create a custom blue circle icon using L.divIcon
@@ -36,6 +37,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 export default function MapComponent({
   selectedObservation,
   zIndex,
+  zoomTrigger,
 }: MapComponentProps) {
   // Make sure selectedObservation is destructured
   const defaultPosition: [number, number] = [0, 0];
@@ -49,7 +51,7 @@ export default function MapComponent({
       const [lng, lat] = selectedObservation.location.coordinates;
       mapRef.current.flyTo([lat, lng], 4);
     }
-  }, [selectedObservation]);
+  }, [selectedObservation, zoomTrigger]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -94,12 +96,12 @@ export default function MapComponent({
       {observations &&
         observations.length > 0 &&
         observations.map((feature) => {
-          const [lng, lat] = feature.geometry.coordinates; // GeoJSON is [longitude, latitude]
+          const [lng, lat] = feature.geometry.coordinates;
           const {
-            species_name,
-            common_name,
-            observation_datetime,
-            location_name,
+            speciesName,
+            commonName,
+            observationDatetime,
+            locationName,
             source,
           } = feature.properties;
 
@@ -109,13 +111,13 @@ export default function MapComponent({
             <Marker key={feature.id} position={[lat, lng]} icon={markerIcon}>
               <Popup>
                 <div>
-                  <strong>{species_name}</strong> (
-                  {source === "obis" && common_name ? common_name : source})
+                  <strong>{speciesName}</strong> (
+                  {source === "obis" && commonName ? commonName : source})
                   <br />
-                  {location_name && `Location: ${location_name}`}
+                  {locationName && `Location: ${locationName}`}
                   <br />
-                  {observation_datetime &&
-                    `Observed: ${new Date(observation_datetime).toLocaleDateString()}`}
+                  {observationDatetime &&
+                    `Observed: ${new Date(observationDatetime).toLocaleDateString()}`}
                 </div>
               </Popup>
             </Marker>
