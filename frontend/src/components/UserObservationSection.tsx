@@ -61,7 +61,8 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedObservation, setSelectedObservation] =
     useState<Observation | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State for modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [zoomTrigger, setZoomTrigger] = useState(0);
 
   const loadObservations = useCallback(async () => {
     if (!user) {
@@ -91,6 +92,7 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
 
   const handleSelectObservation = useCallback((observation: Observation) => {
     setSelectedObservation(observation);
+    setZoomTrigger((prev) => prev + 1);
   }, []);
 
   const handleDeleteObservation = useCallback(
@@ -168,6 +170,7 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
           <DynamicMapComponent
             selectedObservation={selectedObservation}
             zIndex={isEditModalOpen ? 0 : 1}
+            zoomTrigger={zoomTrigger}
           />
           {/* <div className="absolute bottom-4 left-4 z-10">
             <Button>+ Add Observation</Button>
