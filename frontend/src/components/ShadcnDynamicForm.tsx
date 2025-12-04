@@ -32,7 +32,6 @@ import {
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
 import { DynamicFormProps, FormField } from "../types/form";
-import { string } from "zod";
 
 function renderFieldControl(
   field: FormField,
@@ -96,7 +95,6 @@ export default function ShadcnDynamicForm<T extends FieldValues>({
 }: DynamicFormProps<T> & {
   cardClass?: string;
 }) {
-
   const form = useForm<T>({
     resolver: zodResolver(schema as any) as Resolver<T>,
     defaultValues:
@@ -129,49 +127,47 @@ export default function ShadcnDynamicForm<T extends FieldValues>({
 
   return (
     <div className={cardClass}>
-        <h2 className="text-3xl font-bold text-center text-gray-900">
-          {formTitle}
-        </h2>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {fields.map((field: FormField) => (
-              <ShadcnFormField
-                key={field.name}
-                control={form.control}
-                name={field.name as FieldPath<T>}
-                render={({ field: formField }) => (
-                  <FormItem>
-                    <FormLabel>{field.label}</FormLabel>
-                    <FormControl>
-                      {renderFieldControl(field, formField, loading)}
-                    </FormControl>
-                    {field.description && (
-                      <FormDescription>{field.description}</FormDescription>
-                    )}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
-            {error && (
-              <p className="text-red-500 text-sm text-center">{error}</p>
-            )}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Processing..." : submitButtonText}
-            </Button>
-          </form>
-        </Form>
-        {linkText && linkHref && (
-          <p className="text-center text-sm text-gray-600">
-            {linkText}{" "}
-            <Link
-              href={linkHref}
-              className="font-medium text-blue-600 hover:underline"
-            >
-              {linkHref.includes("sign-up") ? "Sign up" : "Sign in"}
-            </Link>
-          </p>
-        )}
-      </div>
+      <h2 className="text-3xl font-bold text-center text-gray-900">
+        {formTitle}
+      </h2>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {fields.map((field: FormField) => (
+            <ShadcnFormField
+              key={field.name}
+              control={form.control}
+              name={field.name as FieldPath<T>}
+              render={({ field: formField }) => (
+                <FormItem>
+                  <FormLabel>{field.label}</FormLabel>
+                  <FormControl>
+                    {renderFieldControl(field, formField, loading)}
+                  </FormControl>
+                  {field.description && (
+                    <FormDescription>{field.description}</FormDescription>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Processing..." : submitButtonText}
+          </Button>
+        </form>
+      </Form>
+      {linkText && linkHref && (
+        <p className="text-center text-sm text-gray-600">
+          {linkText}{" "}
+          <Link
+            href={linkHref}
+            className="font-medium text-blue-600 hover:underline"
+          >
+            {linkHref.includes("sign-up") ? "Sign up" : "Sign in"}
+          </Link>
+        </p>
+      )}
+    </div>
   );
 }

@@ -30,11 +30,36 @@ const addObservationFormSchema = z.object({
   observationDatetime: z
     .string()
     .min(1, "Observation date and time is required"),
-  depthMin: z.preprocess((val) => (val === "" ? null : Number(val)), z.number().nullable()).optional(),
-  depthMax: z.preprocess((val) => (val === "" ? null : Number(val)), z.number().nullable()).optional(),
-  bathymetry: z.preprocess((val) => (val === "" ? null : Number(val)), z.number().nullable()).optional(),
-  temperature: z.preprocess((val) => (val === "" ? null : Number(val)), z.number().nullable()).optional(),
-  visibility: z.preprocess((val) => (val === "" ? null : Number(val)), z.number().nullable()).optional(),
+  depthMin: z
+    .preprocess(
+      (val) => (val === "" ? null : Number(val)),
+      z.number().nullable(),
+    )
+    .optional(),
+  depthMax: z
+    .preprocess(
+      (val) => (val === "" ? null : Number(val)),
+      z.number().nullable(),
+    )
+    .optional(),
+  bathymetry: z
+    .preprocess(
+      (val) => (val === "" ? null : Number(val)),
+      z.number().nullable(),
+    )
+    .optional(),
+  temperature: z
+    .preprocess(
+      (val) => (val === "" ? null : Number(val)),
+      z.number().nullable(),
+    )
+    .optional(),
+  visibility: z
+    .preprocess(
+      (val) => (val === "" ? null : Number(val)),
+      z.number().nullable(),
+    )
+    .optional(),
   notes: z.string().nullable().optional(),
   sex: z.enum(["male", "female", "unknown"]).nullable().optional(),
 });
@@ -43,8 +68,18 @@ const addObservationFormFields: FormField[] = [
   { name: "speciesName", label: "Species Name", type: "text" },
   { name: "commonName", label: "Common Name", type: "text", optional: true },
   { name: "locationName", label: "Location Name", type: "text" },
-  { name: "latitude", label: "Latitude", type: "number", placeholder: "e.g., 34.05" },
-  { name: "longitude", label: "Longitude", type: "number", placeholder: "e.g., -118.25" },
+  {
+    name: "latitude",
+    label: "Latitude",
+    type: "number",
+    placeholder: "e.g., 34.05",
+  },
+  {
+    name: "longitude",
+    label: "Longitude",
+    type: "number",
+    placeholder: "e.g., -118.25",
+  },
   {
     name: "observationDatetime",
     label: "Observation Date/Time",
@@ -115,7 +150,13 @@ export default function AddObservationModal({
     try {
       const newObservationData: Omit<
         Observation,
-        "id" | "createdAt" | "updatedAt" | "image" | "location"
+        | "id"
+        | "createdAt"
+        | "updatedAt"
+        | "image"
+        | "location"
+        | "validated"
+        | "source"
       > & { latitude: number; longitude: number } = {
         speciesName: data.speciesName,
         commonName: data.commonName ?? null,
@@ -123,11 +164,11 @@ export default function AddObservationModal({
         latitude: data.latitude,
         longitude: data.longitude,
         observationDatetime: new Date(data.observationDatetime).toISOString(),
-        depthMin: (data as any).depthMin ?? null,
-        depthMax: (data as any).depthMax ?? null,
-        bathymetry: (data as any).bathymetry ?? null,
-        temperature: (data as any).temperature ?? null,
-        visibility: (data as any).visibility ?? null,
+        depthMin: data.depthMin ?? null,
+        depthMax: data.depthMax ?? null,
+        bathymetry: data.bathymetry ?? null,
+        temperature: data.temperature ?? null,
+        visibility: data.visibility ?? null,
         notes: data.notes ?? null,
         sex: data.sex ?? null,
         user: user.id,

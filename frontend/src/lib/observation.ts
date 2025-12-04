@@ -1,6 +1,9 @@
 import { api } from "./api";
 import { Observation } from "../types/observation";
-import { GeoJsonFeatureCollection, PaginatedGeoJsonFeatures } from "../types/geojson";
+import {
+  GeoJsonFeatureCollection,
+  PaginatedGeoJsonFeatures,
+} from "../types/geojson";
 
 export async function fetchUserObservations(): Promise<Observation[]> {
   try {
@@ -11,7 +14,7 @@ export async function fetchUserObservations(): Promise<Observation[]> {
 
     // Map the GeoJSON features into the frontend's Observation type
     const observations: Observation[] = geoJsonFeatures.map((feature) => ({
-      id: feature.id,
+      id: Number(feature.id),
       user: feature.properties.user,
       speciesName: feature.properties.speciesName,
       commonName: feature.properties.commonName ?? null,
@@ -73,7 +76,13 @@ export async function updateObservation(
 export async function createObservation(
   observationData: Omit<
     Observation,
-    "id" | "createdAt" | "updatedAt" | "image" | "location" | "source" | "validated"
+    | "id"
+    | "createdAt"
+    | "updatedAt"
+    | "image"
+    | "location"
+    | "source"
+    | "validated"
   > & { latitude: number; longitude: number },
 ): Promise<Observation> {
   const { latitude, longitude, ...rest } = observationData;

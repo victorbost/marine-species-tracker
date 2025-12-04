@@ -6,17 +6,17 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { GeoJsonFeature, GeoJsonFeatureCollection } from "../types/geojson";
+import { GeoJsonFeature } from "../types/geojson";
 
 import { Observation } from "../types/observation";
-import { fetchMapObservations } from "../lib/observation"; // Import the new function
+import { fetchMapObservations } from "../lib/observation";
 
 interface MapComponentProps {
   userObservations: Observation[];
   selectedObservation: Observation | null;
   zIndex?: number;
   zoomTrigger: number;
-  mapRefreshTrigger: number; // New prop for triggering refresh
+  mapRefreshTrigger: number;
 }
 
 // Create a custom blue circle icon using L.divIcon
@@ -36,19 +36,18 @@ const yellowIcon = L.divIcon({
   popupAnchor: [0, -8], // Point from which the popup should open relative to the iconAnchor
 });
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"; // Keep if still used elsewhere, otherwise can be removed
 export default function MapComponent({
   userObservations,
   selectedObservation,
   zIndex,
   zoomTrigger,
-  mapRefreshTrigger, // Destructure the new prop
+  mapRefreshTrigger,
 }: MapComponentProps) {
-  console.log("MapComponent rendered. Received mapRefreshTrigger:", mapRefreshTrigger); // eslint-disable-line no-console
-
   // Make sure selectedObservation is destructured
   const defaultPosition: [number, number] = [0, 0];
-  const [obisObservations, setObisObservations] = useState<GeoJsonFeature[]>([]);
+  const [obisObservations, setObisObservations] = useState<GeoJsonFeature[]>(
+    [],
+  );
   const [isMounted, setIsMounted] = useState(false);
 
   const mapRef = useRef<L.Map | null>(null);
@@ -60,22 +59,24 @@ export default function MapComponent({
     }
   }, [selectedObservation, zoomTrigger]);
 
-  const loadMapObservations = useCallback(async () => { // Renamed for clarity
-    console.log("loadMapObservations function called."); // eslint-disable-line no-console
+  const loadMapObservations = useCallback(async () => {
+    // Renamed for clarity
     try {
       const data = await fetchMapObservations(); // Use the new lib function
-      console.log("Fetched observations data:", data.features); // eslint-disable-line no-console
-      setObisObservations(data.features.filter(f => f.properties.source?.toLowerCase() === 'obis'));
+      setObisObservations(
+        data.features.filter(
+          (f) => f.properties.source?.toLowerCase() === "obis",
+        ),
+      );
     } catch (error) {
       console.error("Failed to fetch observations for map:", error); // eslint-disable-line no-console
     }
-  }, []);  // Empty dependency array because fetchMapObservations doesn't depend on local state/props
+  }, []); // Empty dependency array because fetchMapObservations doesn't depend on local state/props
 
   useEffect(() => {
-    console.log("MapComponent useEffect for data fetching is running. mapRefreshTrigger:", mapRefreshTrigger); // eslint-disable-line no-console
     setIsMounted(true);
-    loadMapObservations(); // Call the new load function
-  }, [loadMapObservations, mapRefreshTrigger]); // Add mapRefreshTrigger as a dependency
+    loadMapObservations();
+  }, [loadMapObservations, mapRefreshTrigger]);
 
   if (!isMounted) {
     return null;
@@ -83,17 +84,16 @@ export default function MapComponent({
 
   const allObservations = [
     ...obisObservations,
-    ...userObservations.map(obs => ({
+    ...userObservations.map((obs) => ({
       id: `user-${obs.id}`,
       type: "Feature",
       properties: {
-        // All properties from Observation need to be mapped to GeoJsonFeatureProperties
         id: obs.id,
         speciesName: obs.speciesName,
         commonName: obs.commonName ?? undefined,
         observationDatetime: obs.observationDatetime,
         locationName: obs.locationName,
-        source: "user" as const, // Ensure source is correctly typed
+        source: "user" as const,
         depthMin: obs.depthMin,
         depthMax: obs.depthMax,
         bathymetry: obs.bathymetry,
@@ -108,7 +108,7 @@ export default function MapComponent({
         updated_at: obs.updatedAt,
       },
       geometry: obs.location,
-    }))
+    })),
   ];
 
   return (
@@ -127,8 +127,6 @@ export default function MapComponent({
       {allObservations &&
         allObservations.length > 0 &&
         allObservations.map((feature) => {
-          console.log("Rendering marker for feature ID:", feature.id, "Species:", feature.properties.speciesName); // eslint-disable-line no-console
-
           const [lng, lat] = feature.geometry.coordinates;
           const {
             speciesName,

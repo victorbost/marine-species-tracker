@@ -67,10 +67,6 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [zoomTrigger, setZoomTrigger] = useState(0);
   const [mapRefreshTrigger, setMapRefreshTrigger] = useState(0); // New state for map refresh
-  // Add a useEffect to log changes to mapRefreshTrigger
-  useEffect(() => {
-    console.log("mapRefreshTrigger in UserObservationSection changed to:", mapRefreshTrigger);
-  }, [mapRefreshTrigger]);
 
   const loadObservations = useCallback(async () => {
     if (!user) {
@@ -105,8 +101,8 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
 
   const handleDeleteObservation = useCallback(
     async (observationId: number) => {
-      console.log("handleDeleteObservation called for ID:", observationId); // Log when called
       if (!user) {
+        // eslint-disable-next-line no-console
         console.warn("User not logged in. Cannot delete observation.");
         return;
       }
@@ -116,9 +112,9 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
         if (selectedObservation && selectedObservation.id === observationId) {
           setSelectedObservation(null);
         }
-        console.log("Calling setMapRefreshTrigger from handleDeleteObservation"); // Log before state update
         setMapRefreshTrigger((prev) => prev + 1);
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error("Failed to delete observation:", err);
         setError("Failed to delete observation.");
       }
@@ -148,7 +144,6 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
     setIsAddModalOpen(false);
     setMapRefreshTrigger((prev) => prev + 1);
   };
-
 
   if (isUserLoading) {
     return (
@@ -188,8 +183,13 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
             zoomTrigger={zoomTrigger}
             mapRefreshTrigger={mapRefreshTrigger}
           />
-          <div className="absolute top-4 right-4 z-[1000] p-2 pointer-events-auto" style={{ display: "flex", gap: 8 }}>
-            <Button onClick={() => setIsAddModalOpen(true)}>Add Observation</Button>
+          <div
+            className="absolute top-4 right-4 z-[1000] p-2 pointer-events-auto"
+            style={{ display: "flex", gap: 8 }}
+          >
+            <Button variant="addingObs" onClick={() => setIsAddModalOpen(true)}>
+              Add Observation
+            </Button>
           </div>
         </div>
       </div>

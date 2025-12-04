@@ -28,6 +28,7 @@ api.interceptors.request.use(
   (config) => {
     const csrfToken = getCsrfToken();
     if (csrfToken) {
+      // eslint-disable-next-line no-param-reassign
       config.headers["X-CSRFToken"] = csrfToken;
     }
     return config;
