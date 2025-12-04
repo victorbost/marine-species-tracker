@@ -5,18 +5,17 @@
 import dynamic from "next/dynamic";
 import React, { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import EditObservationModal from "./EditObservationModal";
+import ObservationModal from "./ObservationModal";
+import { ObservationCard } from "./ObservationCard";
+import { useUser } from "./UserProvider";
 
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
 import { Badge } from "./ui/badge";
-import { useUser } from "./UserProvider";
-import { ObservationCard } from "./ObservationCard";
 import { fetchUserObservations, deleteObservation } from "../lib/observation";
 import { Observation } from "../types/observation";
 import Loader from "./Loader";
 import { Button } from "./ui/button"; // Import Button
-import AddObservationModal from "./AddObservationModal"; // Import AddObservationModal
 
 interface UserObservationSectionProps {
   className?: string;
@@ -63,10 +62,10 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedObservation, setSelectedObservation] =
     useState<Observation | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [zoomTrigger, setZoomTrigger] = useState(0);
-  const [mapRefreshTrigger, setMapRefreshTrigger] = useState(0); // New state for map refresh
+  const [mapRefreshTrigger, setMapRefreshTrigger] = useState(0);
 
   const loadObservations = useCallback(async () => {
     if (!user) {
@@ -123,26 +122,25 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
   );
 
   const handleEditObservationClick = useCallback((observation: Observation) => {
-    setSelectedObservation(observation); // Set the observation to be edited
-    setIsEditModalOpen(true); // Open the modal
+    setSelectedObservation(observation);
+    setModalMode("edit");
+    setIsModalOpen(true);
   }, []);
 
-  const handleCloseEditModal = () => {
-    setIsEditModalOpen(false);
-    // Do NOT clear selectedObservation here if you want the map to stay zoomed
-    // If you want the map to reset on modal close, then uncomment:
-    // setSelectedObservation(null);
+  const handleAddObservationClick = () => {
+    setSelectedObservation(null);
+    setModalMode("add");
+    setIsModalOpen(true);
   };
 
-  const handleObservationUpdated = () => {
-    loadObservations(); // Refresh observations after update
-    setMapRefreshTrigger((prev) => prev + 1);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
-  const handleObservationCreated = async () => {
-    await loadObservations();
-    setIsAddModalOpen(false);
+  const handleObservationUpserted = () => {
+    loadObservations();
     setMapRefreshTrigger((prev) => prev + 1);
+    setIsModalOpen(false);
   };
 
   if (isUserLoading) {
@@ -178,7 +176,7 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
         >
           <DynamicMapComponent
             selectedObservation={selectedObservation}
-            zIndex={isEditModalOpen ? 0 : 1}
+            zIndex={isModalOpen ? 0 : 1}
             zoomTrigger={zoomTrigger}
             mapRefreshTrigger={mapRefreshTrigger}
           />
@@ -186,7 +184,7 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
             className="absolute top-4 right-4 z-[1000] p-2 pointer-events-auto"
             style={{ display: "flex", gap: 8 }}
           >
-            <Button variant="addingObs" onClick={() => setIsAddModalOpen(true)}>
+            <Button variant="addingObs" onClick={handleAddObservationClick}>
               Add Observation
             </Button>
           </div>
@@ -214,16 +212,12 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
           </CardContent>
         </Card>
       </div>
-      <EditObservationModal
-        isOpen={isEditModalOpen}
-        onClose={handleCloseEditModal}
-        observation={selectedObservation}
-        onObservationUpdated={handleObservationUpdated}
-      />
-      <AddObservationModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onObservationCreated={handleObservationCreated}
+      <ObservationModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onObservationUpserted={handleObservationUpserted}
+        mode={modalMode}
+        observation={modalMode === "edit" ? selectedObservation : null}
       />
     </div>
   );
