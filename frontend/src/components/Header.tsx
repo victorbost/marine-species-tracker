@@ -6,10 +6,12 @@ export default function Header() {
   const { user, loading, logout } = useUser();
 
   const handleExport = () => {
+    // eslint-disable-next-line no-alert
     alert("Export functionality will be implemented later.");
   };
 
   const handleAllObservations = () => {
+    // eslint-disable-next-line no-alert
     alert("All Observations functionality will be implemented later.");
   };
 
