@@ -20,7 +20,7 @@ function ObservationCard({
 }: ObservationCardProps) {
   return (
     <Card
-      className="w-full max-w-sm cursor-pointer hover:shadow-lg transition-shadow duration-200"
+      className="rounded-xl border text-card-foreground shadow w-full max-w-sm cursor-pointer hover:shadow-lg transition-shadow duration-200"
       onClick={() => onSelectObservation(observation)}
     >
       <CardHeader>
@@ -87,7 +87,7 @@ function ObservationCard({
         </div>
         <div className="flex justify-end space-x-2 mt-4">
           <Button
-            variant="outline"
+            variant="edit"
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
@@ -97,7 +97,7 @@ function ObservationCard({
             Edit
           </Button>
           <Button
-            variant="destructive"
+            variant="delete"
             size="sm"
             onClick={(e) => {
               e.stopPropagation();

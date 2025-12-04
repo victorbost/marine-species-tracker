@@ -1,5 +1,5 @@
 export interface GeoJsonFeatureProperties {
-  id: number;
+  id: number | string;
   speciesName: string;
   commonName?: string;
   observationDatetime: string;
@@ -21,7 +21,7 @@ export interface GeoJsonFeatureProperties {
 }
 
 export interface GeoJsonFeature {
-  id: number;
+  id: number | string;
   type: "Feature";
   properties: GeoJsonFeatureProperties;
   geometry: {

@@ -1,6 +1,6 @@
 import { api } from "./api";
 import { Observation } from "../types/observation";
-import { PaginatedGeoJsonFeatures } from "../types/geojson";
+import { GeoJsonFeatureCollection, PaginatedGeoJsonFeatures } from "../types/geojson";
 
 export async function fetchUserObservations(): Promise<Observation[]> {
   try {
@@ -66,6 +66,49 @@ export async function updateObservation(
       `observation.ts (updateObservation): Error updating observation ${observationId}:`,
       error,
     );
+    throw error;
+  }
+}
+
+export async function createObservation(
+  observationData: Omit<
+    Observation,
+    "id" | "createdAt" | "updatedAt" | "image" | "location" | "source" | "validated"
+  > & { latitude: number; longitude: number },
+): Promise<Observation> {
+  const { latitude, longitude, ...rest } = observationData;
+
+  const dataToSend = {
+    ...rest,
+    location: {
+      type: "Point",
+      coordinates: [longitude, latitude],
+    },
+  };
+
+  try {
+    const response = await api.post<Observation>(
+      `v1/observations/`,
+      dataToSend,
+    );
+    return response.data;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to create observation:", error);
+    throw error;
+  }
+}
+
+export async function fetchMapObservations(): Promise<GeoJsonFeatureCollection> {
+  try {
+    // The map endpoint returns GeoJsonFeatureCollection directly, not PaginatedGeoJsonFeatures
+    const response = await api.get<GeoJsonFeatureCollection>(
+      "v1/map/observations/",
+    );
+    return response.data; // Return the data directly
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Error fetching map observations:", error);
     throw error;
   }
 }

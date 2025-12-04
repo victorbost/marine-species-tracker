@@ -3,10 +3,11 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import { useUser } from "../../components/UserProvider";
-import ShadcnDynamicForm from "../../components/ShadcnDynamicForm";
-import { FormField } from "../../types/form";
-import { useLoading } from "../../hooks/useLoading"; // Import the global loading hook
+import { useUser } from "@/components/UserProvider";
+import ShadcnDynamicForm from "@/components/ShadcnDynamicForm";
+import { FormField } from "@/types/form";
+import { useLoading } from "@/hooks/useLoading";
+import AuthLayout from "@/components/AuthLayout";
 
 const signinSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -17,7 +18,7 @@ export default function SigninPage() {
   const [error, setError] = useState("");
   const router = useRouter();
   const { refetchUser } = useUser();
-  const { startLoading, stopLoading, isLoading } = useLoading(); // Use global loading state and functions
+  const { startLoading, stopLoading, isLoading } = useLoading();
 
   const signinFields: FormField[] = [
     {
@@ -66,20 +67,23 @@ export default function SigninPage() {
         stopLoading();
       }
     },
-    [setError, refetchUser, router, startLoading, stopLoading], // Add startLoading and stopLoading to dependencies
+    [setError, refetchUser, router, startLoading, stopLoading],
   );
 
   return (
-    <ShadcnDynamicForm
-      schema={signinSchema}
-      fields={signinFields}
-      onSubmit={handleSignin}
-      submitButtonText="Sign In"
-      formTitle="Welcome Back"
-      error={error}
-      loading={isLoading}
-      linkText="Don't have an account yet?"
-      linkHref="/sign-up"
-    />
+    <AuthLayout>
+      <ShadcnDynamicForm
+        schema={signinSchema}
+        fields={signinFields}
+        onSubmit={handleSignin}
+        submitButtonText="Sign In"
+        formTitle="Welcome Back"
+        error={error}
+        loading={isLoading}
+        linkText="Don't have an account yet?"
+        linkHref="/sign-up"
+        cardClass="w-full max-w-md p-8 space-y-6 bg-white rounded-lg"
+      />
+    </AuthLayout>
   );
 }

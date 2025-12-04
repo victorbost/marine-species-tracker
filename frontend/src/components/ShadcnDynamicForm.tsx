@@ -32,6 +32,7 @@ import {
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
 import { DynamicFormProps, FormField } from "../types/form";
+import { string } from "zod";
 
 function renderFieldControl(
   field: FormField,
@@ -51,7 +52,7 @@ function renderFieldControl(
               placeholder={field.placeholder || `Select a ${field.label}`}
             />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper" className="z-[9999]">
             {field.options?.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
@@ -91,7 +92,11 @@ export default function ShadcnDynamicForm<T extends FieldValues>({
   linkText,
   linkHref,
   defaultValues,
-}: DynamicFormProps<T>) {
+  cardClass = "w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md",
+}: DynamicFormProps<T> & {
+  cardClass?: string;
+}) {
+
   const form = useForm<T>({
     resolver: zodResolver(schema as any) as Resolver<T>,
     defaultValues:
@@ -123,8 +128,7 @@ export default function ShadcnDynamicForm<T extends FieldValues>({
   }, [defaultValues, form]);
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+    <div className={cardClass}>
         <h2 className="text-3xl font-bold text-center text-gray-900">
           {formTitle}
         </h2>
@@ -169,6 +173,5 @@ export default function ShadcnDynamicForm<T extends FieldValues>({
           </p>
         )}
       </div>
-    </div>
   );
 }

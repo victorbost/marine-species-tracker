@@ -15,6 +15,8 @@ import { ObservationCard } from "./ObservationCard";
 import { fetchUserObservations, deleteObservation } from "../lib/observation";
 import { Observation } from "../types/observation";
 import Loader from "./Loader";
+import { Button } from "./ui/button"; // Import Button
+import AddObservationModal from "./AddObservationModal"; // Import AddObservationModal
 
 interface UserObservationSectionProps {
   className?: string;
@@ -56,13 +58,19 @@ const renderObservationListContent = (
 
 function UserObservationSection({ className }: UserObservationSectionProps) {
   const { user, loading: isUserLoading } = useUser();
-  const [observations, setObservations] = useState<Observation[]>([]);
+  const [observations, setObservations] = useState<Observation[]>([]); // This state holds the observations for both the list and the map
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedObservation, setSelectedObservation] =
     useState<Observation | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [zoomTrigger, setZoomTrigger] = useState(0);
+  const [mapRefreshTrigger, setMapRefreshTrigger] = useState(0); // New state for map refresh
+  // Add a useEffect to log changes to mapRefreshTrigger
+  useEffect(() => {
+    console.log("mapRefreshTrigger in UserObservationSection changed to:", mapRefreshTrigger);
+  }, [mapRefreshTrigger]);
 
   const loadObservations = useCallback(async () => {
     if (!user) {
@@ -97,25 +105,25 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
 
   const handleDeleteObservation = useCallback(
     async (observationId: number) => {
+      console.log("handleDeleteObservation called for ID:", observationId); // Log when called
       if (!user) {
-        // eslint-disable-next-line no-console
         console.warn("User not logged in. Cannot delete observation.");
         return;
       }
       try {
         await deleteObservation(observationId);
         await loadObservations();
-        // If the deleted observation was the one selected for the map, clear it
         if (selectedObservation && selectedObservation.id === observationId) {
-          setSelectedObservation(null); // Clear selected if deleted
+          setSelectedObservation(null);
         }
+        console.log("Calling setMapRefreshTrigger from handleDeleteObservation"); // Log before state update
+        setMapRefreshTrigger((prev) => prev + 1);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error("Failed to delete observation:", err);
         setError("Failed to delete observation.");
       }
     },
-    [user, loadObservations, selectedObservation],
+    [user, loadObservations, selectedObservation, setMapRefreshTrigger],
   );
 
   const handleEditObservationClick = useCallback((observation: Observation) => {
@@ -132,9 +140,15 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
 
   const handleObservationUpdated = () => {
     loadObservations(); // Refresh observations after update
-    // If the map is showing the updated observation, you might want to re-zoom or just let it be.
-    // Since selectedObservation is still set, the MapComponent's useEffect will handle the zoom if needed.
+    setMapRefreshTrigger((prev) => prev + 1);
   };
+
+  const handleObservationCreated = async () => {
+    await loadObservations();
+    setIsAddModalOpen(false);
+    setMapRefreshTrigger((prev) => prev + 1);
+  };
+
 
   if (isUserLoading) {
     return (
@@ -168,13 +182,15 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
           className="h-full bg-white rounded-lg overflow-hidden"
         >
           <DynamicMapComponent
+            userObservations={observations}
             selectedObservation={selectedObservation}
             zIndex={isEditModalOpen ? 0 : 1}
             zoomTrigger={zoomTrigger}
+            mapRefreshTrigger={mapRefreshTrigger}
           />
-          {/* <div className="absolute bottom-4 left-4 z-10">
-            <Button>+ Add Observation</Button>
-          </div> */}
+          <div className="absolute top-4 right-4 z-[1000] p-2 pointer-events-auto" style={{ display: "flex", gap: 8 }}>
+            <Button onClick={() => setIsAddModalOpen(true)}>Add Observation</Button>
+          </div>
         </div>
       </div>
       <div className="md:col-span-1 h-full flex flex-col overflow-hidden">
@@ -204,6 +220,11 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
         onClose={handleCloseEditModal}
         observation={selectedObservation}
         onObservationUpdated={handleObservationUpdated}
+      />
+      <AddObservationModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onObservationCreated={handleObservationCreated}
       />
     </div>
   );

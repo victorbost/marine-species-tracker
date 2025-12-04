@@ -28,7 +28,7 @@ export default function Home() {
   }, [startLoading, stopLoading]);
 
   return (
-    <main className="h-screen bg-kerama-depth flex flex-col">
+    <main className="h-screen flex flex-col">
       <div className="mx-auto max-w-[1440px] h-full max-h-[1076px] w-full p-4">
         <UserObservationSection className="h-full" />
       </div>
