@@ -104,9 +104,9 @@ export default function ShadcnDynamicForm<T extends FieldValues>({
         fields.map((field) => {
           switch (field.type) {
             case "number":
-              return [field.name, undefined];
+              return [field.name, ""];
             case "date":
-              return [field.name, undefined];
+              return [field.name, ""];
             case "select":
             case "text":
             case "email":

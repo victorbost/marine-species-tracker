@@ -12,7 +12,6 @@ import { Observation } from "../types/observation";
 import { fetchMapObservations } from "../lib/observation";
 
 interface MapComponentProps {
-  userObservations: Observation[];
   selectedObservation: Observation | null;
   zIndex?: number;
   zoomTrigger: number;
@@ -37,7 +36,6 @@ const yellowIcon = L.divIcon({
 });
 
 export default function MapComponent({
-  userObservations,
   selectedObservation,
   zIndex,
   zoomTrigger,
@@ -45,9 +43,9 @@ export default function MapComponent({
 }: MapComponentProps) {
   // Make sure selectedObservation is destructured
   const defaultPosition: [number, number] = [0, 0];
-  const [obisObservations, setObisObservations] = useState<GeoJsonFeature[]>(
-    [],
-  );
+  const [allMapObservations, setAllMapObservations] = useState<
+    GeoJsonFeature[]
+  >([]);
   const [isMounted, setIsMounted] = useState(false);
 
   const mapRef = useRef<L.Map | null>(null);
@@ -59,57 +57,33 @@ export default function MapComponent({
     }
   }, [selectedObservation, zoomTrigger]);
 
-  const loadMapObservations = useCallback(async () => {
-    // Renamed for clarity
-    try {
-      const data = await fetchMapObservations(); // Use the new lib function
-      setObisObservations(
-        data.features.filter(
-          (f) => f.properties.source?.toLowerCase() === "obis",
-        ),
-      );
-    } catch (error) {
-      console.error("Failed to fetch observations for map:", error); // eslint-disable-line no-console
+  useEffect(() => {
+    if (mapRef.current && selectedObservation) {
+      const [lng, lat] = selectedObservation.location.coordinates;
+      mapRef.current.flyTo([lat, lng], 4);
     }
-  }, []); // Empty dependency array because fetchMapObservations doesn't depend on local state/props
+  }, [selectedObservation, zoomTrigger]);
+
+  const loadAllMapObservations = useCallback(async () => {
+    // Renamed function for clarity
+    try {
+      const data = await fetchMapObservations();
+      setAllMapObservations(data.features);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to fetch all map observations:", error);
+    }
+  }, []);
 
   useEffect(() => {
     setIsMounted(true);
-    loadMapObservations();
-  }, [loadMapObservations, mapRefreshTrigger]);
+    loadAllMapObservations();
+  }, [loadAllMapObservations, mapRefreshTrigger]);
 
   if (!isMounted) {
     return null;
   }
-
-  const allObservations = [
-    ...obisObservations,
-    ...userObservations.map((obs) => ({
-      id: `user-${obs.id}`,
-      type: "Feature",
-      properties: {
-        id: obs.id,
-        speciesName: obs.speciesName,
-        commonName: obs.commonName ?? undefined,
-        observationDatetime: obs.observationDatetime,
-        locationName: obs.locationName,
-        source: "user" as const,
-        depthMin: obs.depthMin,
-        depthMax: obs.depthMax,
-        bathymetry: obs.bathymetry,
-        temperature: obs.temperature,
-        visibility: obs.visibility,
-        notes: obs.notes,
-        image: obs.image,
-        validated: obs.validated,
-        sex: obs.sex,
-        user: obs.user,
-        created_at: obs.createdAt,
-        updated_at: obs.updatedAt,
-      },
-      geometry: obs.location,
-    })),
-  ];
+  const allObservations = allMapObservations;
 
   return (
     <MapContainer

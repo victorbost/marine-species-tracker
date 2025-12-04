@@ -46,19 +46,31 @@ class CuratedObservationGeoSerializer(GeoFeatureModelSerializer):
             "source",
         )
 
+
 class MapCuratedObservationSerializer(GeoFeatureModelSerializer):
     source = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
-    speciesName = serializers.CharField(source="species_name") # Add this
-    commonName = serializers.CharField(source="common_name", allow_null=True) # Add this, with allow_null
-    locationName = serializers.CharField(source="location_name") # Add this
-    observationDatetime = serializers.DateTimeField(source="observation_datetime") # Add this
+    speciesName = serializers.CharField(source="species_name")  # Add this
+    commonName = serializers.CharField(
+        source="common_name", allow_null=True
+    )  # Add this, with allow_null
+    locationName = serializers.CharField(source="location_name")  # Add this
+    observationDatetime = serializers.DateTimeField(
+        source="observation_datetime"
+    )  # Add this
 
     class Meta:
         model = CuratedObservation
         geo_field = "location"
         # The fields here must match the new camelCase fields you're defining
-        fields = ("id", "speciesName", "commonName", "observationDatetime", "locationName", "source")
+        fields = (
+            "id",
+            "speciesName",
+            "commonName",
+            "observationDatetime",
+            "locationName",
+            "source",
+        )
 
     def get_source(self, obj):
         return "obis"
@@ -70,22 +82,34 @@ class MapCuratedObservationSerializer(GeoFeatureModelSerializer):
 class MapObservationSerializer(GeoFeatureModelSerializer):
     source = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
-    speciesName = serializers.CharField(source="species_name") # Add this
-    commonName = serializers.CharField(source="common_name", allow_null=True) # Add this, with allow_null
-    locationName = serializers.CharField(source="location_name") # Add this
-    observationDatetime = serializers.DateTimeField(source="observation_datetime") # Add this
+    speciesName = serializers.CharField(source="species_name")  # Add this
+    commonName = serializers.CharField(
+        source="common_name", allow_null=True
+    )  # Add this, with allow_null
+    locationName = serializers.CharField(source="location_name")  # Add this
+    observationDatetime = serializers.DateTimeField(
+        source="observation_datetime"
+    )  # Add this
 
     class Meta:
         model = Observation
         geo_field = "location"
         # The fields here must match the new camelCase fields you're defining
-        fields = ("id", "speciesName", "commonName", "observationDatetime", "locationName", "source")
+        fields = (
+            "id",
+            "speciesName",
+            "commonName",
+            "observationDatetime",
+            "locationName",
+            "source",
+        )
 
     def get_source(self, obj):
         return "user"
 
     def get_id(self, obj):
         return f"user-{obj.id}"
+
 
 # Optionally, you could define your own MapObservationSerializer here later
 # For now, just use ObservationGeoSerializer for map results.

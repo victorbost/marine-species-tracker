@@ -10,8 +10,8 @@ from observations.models import Observation
 from species.models import CuratedObservation
 
 from .serializers import (
-    ObservationGeoSerializer,
-    CuratedObservationGeoSerializer,
+    MapObservationSerializer,
+    MapCuratedObservationSerializer,
 )
 
 
@@ -22,6 +22,7 @@ def map_observations(request):
     Geo-filtered observations for the map.
     Params: ?lat=<latitude>&lng=<longitude>&radius=<km>
     """
+
     lat = request.GET.get("lat")
     lng = request.GET.get("lng")
     radius = request.GET.get("radius", 50)
@@ -42,27 +43,44 @@ def map_observations(request):
             curated_species_queryset = curated_species_queryset.filter(
                 location__distance_lte=(point, distance_filter)
             )
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as e:
+            print(f"Error in geo-filtering parameters: {e}")
             return Response(
                 {"detail": "Invalid latitude/longitude/radius."}, status=400
             )
+        except Exception as e:
+            print(f"Unexpected error during geo-filtering: {e}")
+            return Response(
+                {
+                    "detail": (
+                        "An unexpected error occurred during geo-filtering."
+                    )
+                },
+                status=500,
+            )
 
-    # Serialize both querysets
-    # The 'data' from GeoFeatureModelSerializer is a GeoJSON FeatureCollection,
-    # so we extract the 'features' list.
-    user_serializer = ObservationGeoSerializer(
-        user_observations_queryset, many=True
-    )
-    curated_serializer = CuratedObservationGeoSerializer(
-        curated_species_queryset, many=True
-    )
+    try:
+        # Serialize both querysets using the correct Map serializers
+        user_serializer = MapObservationSerializer(
+            user_observations_queryset, many=True
+        )
+        curated_serializer = MapCuratedObservationSerializer(
+            curated_species_queryset, many=True
+        )
 
-    # Combine the features from both serializers
-    combined_features = (
-        user_serializer.data["features"] + curated_serializer.data["features"]
-    )
+        # Combine the features from both serializers
+        combined_features = (
+            user_serializer.data["features"]
+            + curated_serializer.data["features"]
+        )
 
-    # Return a single GeoJSON FeatureCollection containing all combined features
-    return Response(
-        {"type": "FeatureCollection", "features": combined_features}
-    )
+        # Return a single GeoJSON FeatureCollection containing all combined features
+        return Response(
+            {"type": "FeatureCollection", "features": combined_features}
+        )
+    except Exception as e:
+        print(f"Error during serialization or response generation: {e}")
+        return Response(
+            {"detail": "An error occurred while processing map observations."},
+            status=500,
+        )
