@@ -19,6 +19,9 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        edit: "bg-brand-primary-500 text-white hover:[background:linear-gradient(to_bottom_right,#E8FAFF,#21C6E3)] transition-all duration-100",
+        delete:"bg-accent-coral text-white hover:[background:linear-gradient(to_bottom_right,#FF6F59,#0077BA)] transition-all duration-100",
+        addingObs: "kerama-depth text-ocean-200 hover:[background:linear-gradient(to_bottom_right,#003A63,#0077BA,#21C6E3)] transition-all duration-100",
       },
       size: {
         default: "h-9 px-4 py-2",

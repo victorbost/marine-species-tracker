@@ -6,38 +6,49 @@ export default function Header() {
   const { user, loading, logout } = useUser();
 
   const handleExport = () => {
-    // eslint-disable-next-line no-alert
     alert("Export functionality will be implemented later.");
   };
 
   const handleAllObservations = () => {
-    // eslint-disable-next-line no-alert
     alert("All Observations functionality will be implemented later.");
   };
 
   return (
-    <header className="bg-dark shadow-md py-4">
-      <div className="container mx-auto px-4 flex justify-between items-center">
+    <header className="w-full bg-ocean-900/90 backdrop-blur-md border-b border-ocean-800">
+      <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+        {/* LEFT SECTION */}
         <div className="flex flex-col">
-          <h1 className="text-2xl font-bold text-center text-blue-900 mb-2">
+          <h1 className="text-3xl font-display font-semibold text-ocean-100 tracking-tight">
             🌊 Marine Species Observation Tracker
           </h1>
-          <p className="text-xl text-blue-700 mb-2">
+
+          <p className="text-lg font-body text-ocean-300 mt-1">
             Empower divers, biologists, and hobbyists...
           </p>
-          {loading && <p className="text-sm text-gray-600">Loading user...</p>}
-          {!loading && user && (
-            <p className="text-sm text-gray-600">Welcome, {user.username}</p>
+
+          {loading && (
+            <p className="text-sm text-ocean-400 mt-2">Loading user...</p>
           )}
+
+          {!loading && user && (
+            <p className="text-sm text-ocean-300 mt-2">
+              Welcome, {user.username}
+            </p>
+          )}
+
           {!loading && !user && (
-            <p className="text-sm text-red-600">Not logged in.</p>
+            <p className="text-sm text-red-400 mt-2">Not logged in.</p>
           )}
         </div>
-        <nav className="flex items-center space-x-4">
+
+        {/* RIGHT BUTTON GROUP */}
+        <nav className="flex items-center space-x-3">
+          {/* EXPORT BUTTON */}
           <button
             onClick={handleExport}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center"
             type="button"
+            className="flex items-center px-4 py-2 bg-ocean-600 text-ocean-50 rounded-xl
+                       hover:bg-ocean-500 transition-colors shadow-sm"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -55,10 +66,13 @@ export default function Header() {
             </svg>
             Export
           </button>
+
+          {/* ALL OBSERVATIONS */}
           <button
             onClick={handleAllObservations}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors flex items-center"
             type="button"
+            className="flex items-center px-4 py-2 bg-ocean-800 text-ocean-200 rounded-xl
+                       hover:bg-ocean-700 transition-colors shadow-sm"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -76,11 +90,14 @@ export default function Header() {
             </svg>
             All Observations
           </button>
+
+          {/* SIGN OUT */}
           {user && (
             <button
-              onClick={logout} // Use the logout function from context
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors flex items-center"
+              onClick={logout}
               type="button"
+              className="flex items-center px-4 py-2 bg-gray-200/20 text-ocean-200 rounded-xl
+                         hover:bg-gray-300/20 transition-colors shadow-sm border border-gray-400/10"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

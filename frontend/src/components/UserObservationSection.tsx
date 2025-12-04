@@ -182,6 +182,7 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
           className="h-full bg-white rounded-lg overflow-hidden"
         >
           <DynamicMapComponent
+            userObservations={observations}
             selectedObservation={selectedObservation}
             zIndex={isEditModalOpen ? 0 : 1}
             zoomTrigger={zoomTrigger}

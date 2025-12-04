@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+html {
+  font-family: 'Inter', sans-serif;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -59,6 +65,16 @@ body {
     --semantic-warning-100: 40 100% 94%; /* #FFF6E1 */
     --semantic-error-500: 356 62% 55%; /* #D64550 */
     --semantic-error-100: 356 73% 96%; /* #FDECEE */
+
+    /* Typography Families */
+    --font-title: "Inter";
+    --font-subtitle: "Inter";
+    --font-body: "Inter";
+
+    /* Optional sizing scale */
+    --text-title: 1.5rem;
+    --text-subtitle: 1.125rem;
+    --text-body: 1rem;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -122,3 +138,25 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+
+.kerama-depth {
+  background: linear-gradient(to bottom right, #21C6E3, #0077BA, #003A63);
+}
+
+.shallow-reef {
+  background: linear-gradient(to bottom right, #E8FAFF, #21C6E3);
+}
+
+.okinawa-dawn  {
+  background: linear-gradient(to bottom right, #0077BA, #FF6F59);
+}
+
+/* TODO test with %
+
+.shallow-reef {
+  background: linear-gradient(to bottom right, var(--brand-primary-100) 0%, var(--brand-primary-300) 100%);
+}
+.okinawa-dawn {
+  background: linear-gradient(to bottom right, var(--brand-primary-500) 0%, var(--accent-coral-500) 100%);
+} */

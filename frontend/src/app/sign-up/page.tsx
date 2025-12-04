@@ -2,11 +2,11 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { z } from "zod"; // Import zod
-import ShadcnDynamicForm from "../../components/ShadcnDynamicForm"; // Updated import path
-import { FormField } from "../../types/form"; // Import FormField type
+import { z } from "zod";
+import AuthLayout from "@/components/AuthLayout";
+import ShadcnDynamicForm from "@/components/ShadcnDynamicForm";
+import { FormField } from "@/types/form";
 
-// Define the Zod schema for the sign-up form
 const signupSchema = z.object({
   username: z
     .string()
@@ -101,16 +101,18 @@ export default function SignupPage() {
   );
 
   return (
-    <ShadcnDynamicForm
-      schema={signupSchema}
-      fields={signupFields}
-      onSubmit={handleSignup}
-      submitButtonText="Sign Up"
-      formTitle="Create Your Account"
-      error={error}
-      loading={loading}
-      linkText="Already have an account?"
-      linkHref="/sign-in"
-    />
+    <AuthLayout>
+      <ShadcnDynamicForm
+        schema={signupSchema}
+        fields={signupFields}
+        onSubmit={handleSignup}
+        submitButtonText="Sign Up"
+        formTitle="Create Your Account"
+        error={error}
+        loading={loading}
+        linkText="Already have an account?"
+        linkHref="/sign-in"
+      />
+    </AuthLayout>
   );
 }

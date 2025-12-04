@@ -103,7 +103,7 @@ export async function fetchMapObservations(): Promise<GeoJsonFeatureCollection> 
   try {
     // The map endpoint returns GeoJsonFeatureCollection directly, not PaginatedGeoJsonFeatures
     const response = await api.get<GeoJsonFeatureCollection>(
-      "v1/map/observations/?lat=0&lng=0&radius=10000",
+      "v1/map/observations/",
     );
     return response.data; // Return the data directly
   } catch (error) {
