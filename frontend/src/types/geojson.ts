@@ -15,7 +15,7 @@ export interface GeoJsonFeatureProperties {
   image: string | null;
   validated: "pending" | "validated" | "rejected";
   sex: "male" | "female" | "unknown" | null;
-  user: number; // User ID
+  userId: number;
   created_at: string;
   updated_at: string;
 }

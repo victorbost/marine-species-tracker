@@ -15,7 +15,7 @@ export async function fetchUserObservations(): Promise<Observation[]> {
     // Map the GeoJSON features into the frontend's Observation type
     const observations: Observation[] = geoJsonFeatures.map((feature) => ({
       id: Number(feature.id),
-      user: feature.properties.user,
+      userId: feature.properties.userId,
       speciesName: feature.properties.speciesName,
       commonName: feature.properties.commonName ?? null,
       location: feature.geometry,
