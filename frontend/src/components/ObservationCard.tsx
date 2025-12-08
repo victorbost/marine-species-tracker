@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Observation } from "../types/observation";
+import { formatDepth } from "../lib/utils";
 
 interface ObservationCardProps {
   observation: Observation;
@@ -51,9 +52,9 @@ function ObservationCard({
             <p className="text-sm text-muted-foreground">
               Date: {format(new Date(observation.observationDatetime), "PPP p")}
             </p>
-            {observation.depthMin !== null && observation.depthMax !== null && (
+            {formatDepth(observation.depthMin, observation.depthMax) && (
               <p className="text-sm text-muted-foreground">
-                Depth: {observation.depthMin}m - {observation.depthMax}m
+                Depth: {formatDepth(observation.depthMin, observation.depthMax)}
               </p>
             )}
             {observation.bathymetry !== null && (
@@ -61,13 +62,17 @@ function ObservationCard({
                 Bathymetry: {observation.bathymetry}m
               </p>
             )}
-            <p className="text-sm text-muted-foreground">
-              Temperature: {observation.temperature}°C
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Visibility: {observation.visibility}m
-            </p>
-            {observation.sex && observation.sex !== "unknown" && (
+            {observation.temperature !== null && (
+              <p className="text-sm text-muted-foreground">
+                Temperature: {observation.temperature}°C
+              </p>
+            )}
+            {observation.visibility !== null && (
+              <p className="text-sm text-muted-foreground">
+                Visibility: {observation.visibility}m
+              </p>
+            )}
+            {observation.sex && (
               <p className="text-sm text-muted-foreground">
                 Sex: {observation.sex}
               </p>
