@@ -15,7 +15,7 @@ import { Badge } from "./ui/badge";
 import { fetchUserObservations, deleteObservation } from "../lib/observation";
 import { Observation } from "../types/observation";
 import Loader from "./Loader";
-import { Button } from "./ui/button"; // Import Button
+import { Button } from "./ui/button";
 
 interface UserObservationSectionProps {
   className?: string;

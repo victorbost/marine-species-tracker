@@ -43,6 +43,7 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
     sex = serializers.ChoiceField(
         choices=Observation.SEX_CHOICES, allow_null=True, required=False
     )
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Observation
@@ -68,7 +69,6 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
         )
 
     read_only_fields = (
-        "user",
         "source",
         "validated",
         "created_at",

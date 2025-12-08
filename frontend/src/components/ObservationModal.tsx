@@ -182,7 +182,7 @@ export default function ObservationModal({
         temperature: undefined,
         visibility: undefined,
         notes: undefined,
-        sex: undefined,
+        sex: "unknown",
       });
     }
   }, [mode, observation, isOpen]);
@@ -219,7 +219,7 @@ export default function ObservationModal({
           temperature: data.temperature ?? null,
           visibility: data.visibility ?? null,
           notes: data.notes ?? null,
-          sex: data.sex ?? null,
+          sex: data.sex ?? "unknown",
         };
         await updateObservation(observation.id, updatedObservationData);
       } else {
@@ -236,8 +236,8 @@ export default function ObservationModal({
           temperature: data.temperature ?? null,
           visibility: data.visibility ?? null,
           notes: data.notes ?? null,
-          sex: data.sex ?? null,
-          user: user.id,
+          sex: data.sex ?? "unknown",
+          userId: user.id,
         };
         await createObservation(newObservationData);
       }
