@@ -35,10 +35,9 @@ export interface GeoJsonFeatureCollection {
   features: GeoJsonFeature[];
 }
 
-// New interface for the complete paginated API response
 export interface PaginatedGeoJsonFeatures {
   count: number;
   next: string | null;
   previous: string | null;
-  results: GeoJsonFeatureCollection; // The actual GeoJsonFeatureCollection is nested here
+  results: GeoJsonFeatureCollection;
 }

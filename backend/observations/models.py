@@ -80,6 +80,9 @@ class Observation(TimeStampedModel, models.Model):
         null=True,
     )
 
+    class Meta:
+        ordering = ["-created_at"]
+
     def save(self, *args, **kwargs):
         if self.image and hasattr(self.image, "file"):
             img = Image.open(self.image)
