@@ -39,7 +39,7 @@ function MiniObservationCard({ observation }: MiniObservationCardProps) {
           />
         </div>
       )}
-      <p>Location: {observation.locationName}</p>
+      {isUserObservation && <p>Location: {observation.locationName}</p>}
       <p>Date: {format(new Date(observation.observationDatetime), "PPP p")}</p>
       {observation.depthMin !== null && observation.depthMax !== null && (
         <p>Depth: {formatDepth(observation.depthMin, observation.depthMax)}</p>

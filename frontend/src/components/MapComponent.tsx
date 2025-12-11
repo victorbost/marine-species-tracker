@@ -19,21 +19,28 @@ interface MapComponentProps {
   mapRefreshTrigger: number;
 }
 
-// Create a custom blue circle icon using L.divIcon
-const blueIcon = L.divIcon({
-  className: "custom-blue-marker",
-  html: '<div style="background-color: #007bff; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;"></div>',
-  iconSize: [16, 16], // Size of the icon
-  iconAnchor: [8, 8], // Point of the icon which will correspond to marker's location
-  popupAnchor: [0, -8], // Point from which the popup should open relative to the iconAnchor
+const externalIcon = L.divIcon({
+  className: "custom-external-marker",
+  html: '<div style="background-color: hsl(var(--brand-primary-700)); width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;"></div>',
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+  popupAnchor: [0, -8],
 });
 
-const yellowIcon = L.divIcon({
-  className: "custom-yellow-marker",
-  html: '<div style="background-color: #FFD700; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;"></div>',
-  iconSize: [16, 16], // Size of the icon
-  iconAnchor: [8, 8], // Point of the icon which will correspond to marker's location
-  popupAnchor: [0, -8], // Point from which the popup should open relative to the iconAnchor
+const validatedUserIcon = L.divIcon({
+  className: "custom-user-marker",
+  html: '<div style="background-color: hsl(var(--brand-primary-500)); width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;"></div>',
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+  popupAnchor: [0, -8],
+});
+
+const pendingUserIcon = L.divIcon({
+  className: "custom-pending-marker",
+  html: '<div style="background-color: hsl(var(--brand-primary-300)); width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;"></div>',
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+  popupAnchor: [0, -8],
 });
 
 export default function MapComponent({
@@ -66,7 +73,6 @@ export default function MapComponent({
   }, [selectedObservation, zoomTrigger]);
 
   const loadAllMapObservations = useCallback(async () => {
-    // Renamed function for clarity
     try {
       const data = await fetchMapObservations();
       setAllMapObservations(data.features);
@@ -84,7 +90,10 @@ export default function MapComponent({
   if (!isMounted) {
     return null;
   }
-  const allObservations = allMapObservations;
+
+  const allObservations = allMapObservations.filter(
+    (feature) => feature.properties.validated !== "rejected",
+  );
 
   return (
     <MapContainer
@@ -113,17 +122,28 @@ export default function MapComponent({
               case "pending":
                 popupClassName = "popup-pending";
                 break;
-              case "rejected":
-                popupClassName = "popup-rejected";
-                break;
               default:
                 popupClassName = ""; // No specific class for default or unknown status
             }
+          } else {
+            popupClassName = "popup-external";
           }
 
-          const { source } = feature.properties;
+          let markerIcon;
+          if (feature.properties.source === "user") {
+            if (feature.properties.validated === "validated") {
+              markerIcon = validatedUserIcon;
+            } else if (feature.properties.validated === "pending") {
+              markerIcon = pendingUserIcon;
+            } else {
+              // This covers 'rejected' and any other unhandled user statuses
+              markerIcon = externalIcon;
+            }
+          } else {
+            // For non-user sources
+            markerIcon = externalIcon;
+          }
 
-          const markerIcon = source === "user" ? yellowIcon : blueIcon;
           return (
             <Marker key={feature.id} position={[lat, lng]} icon={markerIcon}>
               <Popup className={popupClassName}>

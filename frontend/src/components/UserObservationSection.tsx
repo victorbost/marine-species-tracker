@@ -7,11 +7,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import ObservationModal from "./ObservationModal";
 import { ObservationCard } from "./ObservationCard";
+import { ObservationFilterAndSort } from "./ObservationFilterAndSort";
 import { useUser } from "./UserProvider";
 
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
-import { Badge } from "./ui/badge";
 import { fetchUserObservations, deleteObservation } from "../lib/observation";
 import { Observation } from "../types/observation";
 import Loader from "./Loader";
@@ -44,13 +44,14 @@ const renderObservationListContent = (
       <p className="p-4">No observations found. Start by adding a new one!</p>
     );
   }
-  return observations.map((observation: Observation) => (
+  return observations.map((observation: Observation, index: number) => (
     <ObservationCard
       key={observation.id}
       observation={observation}
       onSelectObservation={onSelectObservation}
       onDeleteObservation={onDeleteObservation}
       onEditObservationClick={onEditObservationClick}
+      className={index < observations.length - 1 ? "mb-2" : ""}
     />
   ));
 };
@@ -66,11 +67,15 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [zoomTrigger, setZoomTrigger] = useState(0);
   const [mapRefreshTrigger, setMapRefreshTrigger] = useState(0);
+  const [displayObservations, setDisplayObservations] = useState<Observation[]>(
+    [],
+  );
 
   const loadObservations = useCallback(async () => {
     if (!user) {
       setIsLoading(false);
       setObservations([]);
+      setDisplayObservations([]);
       return;
     }
 
@@ -79,6 +84,7 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
     try {
       const userObservations = await fetchUserObservations();
       setObservations(userObservations);
+      setDisplayObservations(userObservations);
     } catch (err) {
       const errorMessage = "Failed to load observations.";
       setError(errorMessage);
@@ -87,15 +93,21 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (!isUserLoading) {
-      loadObservations();
-    }
-  }, [loadObservations, isUserLoading]);
+  const handleFilteredObservationsChange = useCallback(
+    (filteredList: Observation[]) => {
+      setDisplayObservations(filteredList);
+    },
+    [], // Empty dependency array means this function is created once
+  );
 
   const handleSelectObservation = useCallback((observation: Observation) => {
-    setSelectedObservation(observation);
-    setZoomTrigger((prev) => prev + 1);
+    if (observation.validated !== "rejected") {
+      setSelectedObservation(observation);
+      setZoomTrigger((prev) => prev + 1);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log("Rejected observations cannot be selected for zooming.");
+    }
   }, []);
 
   const handleDeleteObservation = useCallback(
@@ -142,6 +154,12 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
     setMapRefreshTrigger((prev) => prev + 1);
     setIsModalOpen(false);
   };
+
+  useEffect(() => {
+    if (!isUserLoading) {
+      loadObservations();
+    }
+  }, [loadObservations, isUserLoading]);
 
   if (isUserLoading) {
     return (
@@ -194,8 +212,11 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
         <Card className="rounded-none shadow-none border-none flex-grow flex flex-col overflow-hidden">
           <CardHeader>
             <CardTitle className="flex justify-between items-center">
-              Observations ({observations.length})
-              <Badge variant="secondary">All public observations</Badge>
+              Observations ({displayObservations.length})
+              <ObservationFilterAndSort
+                observations={observations} // Pass the raw observations
+                onFilteredObservationsChange={handleFilteredObservationsChange}
+              />
             </CardTitle>
           </CardHeader>
           <CardContent className="flex-grow overflow-hidden">
@@ -203,7 +224,7 @@ function UserObservationSection({ className }: UserObservationSectionProps) {
               {renderObservationListContent(
                 isLoading,
                 error,
-                observations,
+                displayObservations,
                 handleSelectObservation,
                 handleDeleteObservation,
                 handleEditObservationClick,
