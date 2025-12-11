@@ -174,30 +174,30 @@ body {
 
 /* For validated user observation popups */
 .popup-validated .leaflet-popup-content-wrapper {
-  border-color: hsl(var(--semantic-success-500)); /* Border color */
+  border-color: hsl(var(--brand-primary-500)); /* Border color */
   border-width: 2px; /* Set a border width to make it visible */
   border-style: solid; /* Ensure solid border style */
 }
 .popup-validated .leaflet-popup-tip {
-  background: hsl(var(--semantic-success-500)); /* Tip background matches border */
+  background: hsl(var(--brand-primary-500)); /* Tip background matches border */
 }
 
 /* For pending user observation popups */
 .popup-pending .leaflet-popup-content-wrapper {
-  border-color: hsl(var(--semantic-warning-500));
+  border-color: hsl(var(--brand-primary-300));
   border-width: 2px;
   border-style: solid;
 }
 .popup-pending .leaflet-popup-tip {
-  background: hsl(var(--semantic-warning-500));
+  background: hsl(var(--brand-primary-300));
 }
 
-/* For rejected user observation popups */
-.popup-rejected .leaflet-popup-content-wrapper {
-  border-color: hsl(var(--semantic-error-500));
-  border-width: 2px;
-  border-style: solid;
+/* For external observation popups */
+.popup-external .leaflet-popup-content-wrapper {
+  border-color: hsl(var(--brand-primary-700)); /* Border color */
+  border-width: 2px; /* Set a border width to make it visible */
+  border-style: solid; /* Ensure solid border style */
 }
-.popup-rejected .leaflet-popup-tip {
-  background: hsl(var(--semantic-error-500));
+.popup-external .leaflet-popup-tip {
+  background: hsl(var(--brand-primary-700)); /* Tip background matches border */
 }

@@ -4,13 +4,14 @@ import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Observation } from "../types/observation";
-import { formatDepth } from "../lib/utils";
+import { cn, formatDepth } from "../lib/utils";
 
 interface ObservationCardProps {
   observation: Observation;
   onSelectObservation: (observation: Observation) => void;
   onDeleteObservation: (observationId: number) => void;
   onEditObservationClick: (observation: Observation) => void;
+  className?: string;
 }
 
 function ObservationCard({
@@ -18,6 +19,7 @@ function ObservationCard({
   onSelectObservation,
   onDeleteObservation,
   onEditObservationClick,
+  className,
 }: ObservationCardProps) {
   const getStatusTextColorClass = (status: Observation["validated"]) => {
     switch (status) {
@@ -37,21 +39,39 @@ function ObservationCard({
   const getStatusFillColorClass = (status: Observation["validated"]) => {
     switch (status) {
       case "validated":
-        return "fill-semantic-success-500"; // Tailwind class for SVG fill
+        return "fill-semantic-success-500";
       case "pending":
-        return "fill-semantic-warning-500"; // Tailwind class for SVG fill
+        return "fill-semantic-warning-500";
       case "rejected":
-        return "fill-semantic-error-500"; // Tailwind class for SVG fill
+        return "fill-semantic-error-500";
       default:
-        return "fill-gray-400"; // Default fill color
+        return "fill-gray-400";
     }
   };
 
   const statusFillColorClass = getStatusFillColorClass(observation.validated);
+  const getStatusBorderColorClass = (status: Observation["validated"]) => {
+    if (status === "validated") {
+      return "border-brand-primary-900";
+    }
+    if (status === "pending") {
+      return "border-brand-primary-700";
+    }
+    // This covers 'rejected' and any other unhandled status
+    return "border-brand-primary-500";
+  };
+
+  const statusBorderColorClass = getStatusBorderColorClass(
+    observation.validated,
+  );
 
   return (
     <Card
-      className="rounded-xl border text-card-foreground shadow w-full max-w-sm cursor-pointer hover:shadow-lg transition-shadow duration-200"
+      className={cn(
+        "rounded-xl border text-card-foreground shadow w-full max-w-sm cursor-pointer hover:shadow-lg transition-shadow duration-200",
+        statusBorderColorClass,
+        className,
+      )}
       onClick={() => onSelectObservation(observation)}
     >
       <CardHeader>
