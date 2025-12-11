@@ -19,6 +19,36 @@ function ObservationCard({
   onDeleteObservation,
   onEditObservationClick,
 }: ObservationCardProps) {
+  const getStatusTextColorClass = (status: Observation["validated"]) => {
+    switch (status) {
+      case "validated":
+        return "text-semantic-success-500";
+      case "pending":
+        return "text-semantic-warning-500";
+      case "rejected":
+        return "text-semantic-error-500";
+      default:
+        return "text-muted-foreground";
+    }
+  };
+
+  const statusTextColorClass = getStatusTextColorClass(observation.validated);
+
+  const getStatusFillColorClass = (status: Observation["validated"]) => {
+    switch (status) {
+      case "validated":
+        return "fill-semantic-success-500"; // Tailwind class for SVG fill
+      case "pending":
+        return "fill-semantic-warning-500"; // Tailwind class for SVG fill
+      case "rejected":
+        return "fill-semantic-error-500"; // Tailwind class for SVG fill
+      default:
+        return "fill-gray-400"; // Default fill color
+    }
+  };
+
+  const statusFillColorClass = getStatusFillColorClass(observation.validated);
+
   return (
     <Card
       className="rounded-xl border text-card-foreground shadow w-full max-w-sm cursor-pointer hover:shadow-lg transition-shadow duration-200"
@@ -83,34 +113,47 @@ function ObservationCard({
               </p>
             )}
             <p className="text-sm text-muted-foreground">
-              Status: {observation.validated}
-            </p>
-            <p className="text-sm text-muted-foreground">
               Source: {observation.source}
             </p>
           </div>
         </div>
-        <div className="flex justify-end space-x-2 mt-4">
-          <Button
-            variant="edit"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEditObservationClick(observation);
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="delete"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDeleteObservation(observation.id);
-            }}
-          >
-            Delete
-          </Button>
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center space-x-2">
+            <svg
+              className={`h-5 w-5 ${statusFillColorClass}`}
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="12" cy="12" r="8" />
+            </svg>
+            <span className={`text-sm ${statusTextColorClass}`}>
+              {observation.validated.charAt(0).toUpperCase() +
+                observation.validated.slice(1)}
+            </span>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button
+              variant="edit"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditObservationClick(observation);
+              }}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="delete"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteObservation(observation.id);
+              }}
+            >
+              Delete
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
