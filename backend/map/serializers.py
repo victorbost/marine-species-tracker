@@ -11,6 +11,27 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
     observationDatetime = serializers.DateTimeField(
         source="observation_datetime"
     )
+    # New fields for Observation
+    commonName = serializers.CharField(
+        source="common_name", allow_null=True, required=False
+    )
+    depthMin = serializers.FloatField(
+        source="depth_min", allow_null=True, required=False
+    )
+    depthMax = serializers.FloatField(
+        source="depth_max", allow_null=True, required=False
+    )
+    bathymetry = serializers.FloatField(allow_null=True, required=False)
+    temperature = serializers.FloatField(allow_null=True, required=False)
+    visibility = serializers.FloatField(allow_null=True, required=False)
+    notes = serializers.CharField(allow_null=True, required=False)
+    image = serializers.ImageField(allow_null=True, required=False)
+    sex = serializers.CharField(allow_null=True, required=False)
+    userId = serializers.PrimaryKeyRelatedField(
+        source="user.id", read_only=True
+    )
+    createdAt = serializers.DateTimeField(source="created_at", read_only=True)
+    updatedAt = serializers.DateTimeField(source="updated_at", read_only=True)
 
     class Meta:
         model = Observation
@@ -18,10 +39,23 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
         fields = (
             "id",
             "speciesName",
+            "commonName",
             "location",
             "observationDatetime",
             "locationName",
             "source",
+            "image",
+            "depthMin",
+            "depthMax",
+            "bathymetry",
+            "temperature",
+            "visibility",
+            "notes",
+            "sex",
+            "validated",
+            "userId",
+            "createdAt",
+            "updatedAt",
         )
 
 
@@ -32,6 +66,23 @@ class CuratedObservationGeoSerializer(GeoFeatureModelSerializer):
     observationDatetime = serializers.DateTimeField(
         source="observation_datetime"
     )
+    depthMin = serializers.FloatField(
+        source="depth_min", allow_null=True, required=False
+    )
+    depthMax = serializers.FloatField(
+        source="depth_max", allow_null=True, required=False
+    )
+    bathymetry = serializers.FloatField(allow_null=True, required=False)
+    temperature = serializers.FloatField(allow_null=True, required=False)
+    visibility = serializers.FloatField(allow_null=True, required=False)
+    notes = serializers.CharField(allow_null=True, required=False)
+    image = serializers.URLField(
+        allow_null=True, required=False
+    )  # CuratedObservation uses URLField for image
+    sex = serializers.CharField(allow_null=True, required=False)
+    userId = serializers.CharField(
+        source="user", allow_null=True, required=False
+    )  # As user is a CharField in CuratedObservation
 
     class Meta:
         model = CuratedObservation
@@ -44,6 +95,16 @@ class CuratedObservationGeoSerializer(GeoFeatureModelSerializer):
             "observationDatetime",
             "locationName",
             "source",
+            "image",
+            "depthMin",
+            "depthMax",
+            "bathymetry",
+            "temperature",
+            "visibility",
+            "notes",
+            "sex",
+            "validated",
+            "userId",
         )
 
 
@@ -58,6 +119,21 @@ class MapCuratedObservationSerializer(GeoFeatureModelSerializer):
     observationDatetime = serializers.DateTimeField(
         source="observation_datetime"
     )  # Add this
+    depthMin = serializers.FloatField(
+        source="depth_min", allow_null=True, required=False
+    )
+    depthMax = serializers.FloatField(
+        source="depth_max", allow_null=True, required=False
+    )
+    bathymetry = serializers.FloatField(allow_null=True, required=False)
+    temperature = serializers.FloatField(allow_null=True, required=False)
+    visibility = serializers.FloatField(allow_null=True, required=False)
+    notes = serializers.CharField(allow_null=True, required=False)
+    image = serializers.URLField(allow_null=True, required=False)
+    sex = serializers.CharField(allow_null=True, required=False)
+    username = serializers.CharField(
+        source="user.username", read_only=True, allow_null=True
+    )  # ADD THIS LINE
 
     class Meta:
         model = CuratedObservation
@@ -67,9 +143,20 @@ class MapCuratedObservationSerializer(GeoFeatureModelSerializer):
             "id",
             "speciesName",
             "commonName",
+            "location",
             "observationDatetime",
             "locationName",
             "source",
+            "image",
+            "depthMin",
+            "depthMax",
+            "bathymetry",
+            "temperature",
+            "visibility",
+            "notes",
+            "sex",
+            "validated",
+            "username",
         )
 
     def get_source(self, obj):
@@ -90,6 +177,26 @@ class MapObservationSerializer(GeoFeatureModelSerializer):
     observationDatetime = serializers.DateTimeField(
         source="observation_datetime"
     )  # Add this
+    depthMin = serializers.FloatField(
+        source="depth_min", allow_null=True, required=False
+    )
+    depthMax = serializers.FloatField(
+        source="depth_max", allow_null=True, required=False
+    )
+    bathymetry = serializers.FloatField(allow_null=True, required=False)
+    temperature = serializers.FloatField(allow_null=True, required=False)
+    visibility = serializers.FloatField(allow_null=True, required=False)
+    notes = serializers.CharField(allow_null=True, required=False)
+    image = serializers.ImageField(allow_null=True, required=False)
+    sex = serializers.CharField(allow_null=True, required=False)
+    userId = serializers.PrimaryKeyRelatedField(
+        source="user.id", read_only=True
+    )
+    username = serializers.CharField(
+        source="user.username", read_only=True, allow_null=True
+    )  # ADD THIS LINE
+    createdAt = serializers.DateTimeField(source="created_at", read_only=True)
+    updatedAt = serializers.DateTimeField(source="updated_at", read_only=True)
 
     class Meta:
         model = Observation
@@ -99,9 +206,23 @@ class MapObservationSerializer(GeoFeatureModelSerializer):
             "id",
             "speciesName",
             "commonName",
+            "location",
             "observationDatetime",
             "locationName",
             "source",
+            "image",
+            "depthMin",
+            "depthMax",
+            "bathymetry",
+            "temperature",
+            "visibility",
+            "notes",
+            "sex",
+            "validated",
+            "userId",
+            "username",
+            "createdAt",
+            "updatedAt",
         )
 
     def get_source(self, obj):

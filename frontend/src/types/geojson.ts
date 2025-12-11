@@ -18,6 +18,7 @@ export interface GeoJsonFeatureProperties {
   userId: number;
   created_at: string;
   updated_at: string;
+  username?: string | null;
 }
 
 export interface GeoJsonFeature {

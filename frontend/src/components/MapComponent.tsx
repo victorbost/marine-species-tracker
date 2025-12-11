@@ -10,6 +10,7 @@ import { GeoJsonFeature } from "../types/geojson";
 
 import { Observation } from "../types/observation";
 import { fetchMapObservations } from "../lib/observation";
+import { MiniObservationCard } from "./MiniObservationCard";
 
 interface MapComponentProps {
   selectedObservation: Observation | null;
@@ -102,28 +103,54 @@ export default function MapComponent({
         allObservations.length > 0 &&
         allObservations.map((feature) => {
           const [lng, lat] = feature.geometry.coordinates;
-          const {
-            speciesName,
-            commonName,
-            observationDatetime,
-            locationName,
-            source,
-          } = feature.properties;
+          // Determine the class for the Popup based on observation status and source
+          let popupClassName = "";
+          if (feature.properties.source === "user") {
+            switch (feature.properties.validated) {
+              case "validated":
+                popupClassName = "popup-validated";
+                break;
+              case "pending":
+                popupClassName = "popup-pending";
+                break;
+              case "rejected":
+                popupClassName = "popup-rejected";
+                break;
+              default:
+                popupClassName = ""; // No specific class for default or unknown status
+            }
+          }
+
+          const { source } = feature.properties;
 
           const markerIcon = source === "user" ? yellowIcon : blueIcon;
-
           return (
             <Marker key={feature.id} position={[lat, lng]} icon={markerIcon}>
-              <Popup>
-                <div>
-                  <strong>{speciesName}</strong> (
-                  {source === "obis" && commonName ? commonName : source})
-                  <br />
-                  {locationName && `Location: ${locationName}`}
-                  <br />
-                  {observationDatetime &&
-                    `Observed: ${new Date(observationDatetime).toLocaleDateString()}`}
-                </div>
+              <Popup className={popupClassName}>
+                <MiniObservationCard
+                  observation={{
+                    id: feature.id as number,
+                    speciesName: feature.properties.speciesName,
+                    commonName: feature.properties.commonName ?? null,
+                    observationDatetime: feature.properties.observationDatetime,
+                    locationName: feature.properties.locationName ?? null,
+                    source: feature.properties.source,
+                    image: feature.properties.image ?? null,
+                    depthMin: feature.properties.depthMin ?? null,
+                    depthMax: feature.properties.depthMax ?? null,
+                    bathymetry: feature.properties.bathymetry ?? null,
+                    temperature: feature.properties.temperature ?? null,
+                    visibility: feature.properties.visibility ?? null,
+                    sex: feature.properties.sex ?? null,
+                    notes: feature.properties.notes ?? null,
+                    validated: feature.properties.validated,
+                    location: feature.geometry,
+                    userId: feature.properties.userId ?? null,
+                    username: feature.properties.username ?? null,
+                    createdAt: feature.properties.created_at ?? null,
+                    updatedAt: feature.properties.updated_at ?? null,
+                  }}
+                />
               </Popup>
             </Marker>
           );

@@ -21,4 +21,5 @@ export interface Observation {
   sex: "male" | "female" | "unknown" | null;
   createdAt: string;
   updatedAt: string;
+  username: string | null;
 }
