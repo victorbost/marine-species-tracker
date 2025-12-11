@@ -19,18 +19,19 @@ interface MapComponentProps {
   mapRefreshTrigger: number;
 }
 
-// Create a custom blue circle icon using L.divIcon
-const blueIcon = L.divIcon({
-  className: "custom-blue-marker",
-  html: '<div style="background-color: #007bff; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;"></div>',
+// Create a custom external icon using L.divIcon with brand-primary-900
+const externalIcon = L.divIcon({
+  className: "custom-external-marker", // Renamed class
+  html: '<div style="background-color: hsl(var(--brand-primary-700)); width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;"></div>',
   iconSize: [16, 16], // Size of the icon
   iconAnchor: [8, 8], // Point of the icon which will correspond to marker's location
   popupAnchor: [0, -8], // Point from which the popup should open relative to the iconAnchor
 });
 
-const yellowIcon = L.divIcon({
-  className: "custom-yellow-marker",
-  html: '<div style="background-color: #FFD700; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;"></div>',
+// Create a custom user icon using L.divIcon with brand-primary-500
+const userIcon = L.divIcon({
+  className: "custom-user-marker", // Renamed class
+  html: '<div style="background-color: hsl(var(--brand-primary-300)); width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;"></div>',
   iconSize: [16, 16], // Size of the icon
   iconAnchor: [8, 8], // Point of the icon which will correspond to marker's location
   popupAnchor: [0, -8], // Point from which the popup should open relative to the iconAnchor
@@ -121,9 +122,9 @@ export default function MapComponent({
             }
           }
 
-          const { source } = feature.properties;
+          const markerIcon =
+            feature.properties.source === "user" ? userIcon : externalIcon;
 
-          const markerIcon = source === "user" ? yellowIcon : blueIcon;
           return (
             <Marker key={feature.id} position={[lat, lng]} icon={markerIcon}>
               <Popup className={popupClassName}>
