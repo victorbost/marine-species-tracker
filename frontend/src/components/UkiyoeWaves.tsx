@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useMemo } from "react";
 import { Canvas, useFrame, extend } from "@react-three/fiber";
 import { shaderMaterial } from "@react-three/drei";
 import * as THREE from "three";
-// import SharkFin from "./SharkFin"
+import SharkFin from "./SharkFin"
 
 const useBrandColors = () => {
   // Default fallback colors (in case CSS hasn't loaded yet)
@@ -138,7 +138,7 @@ function UkiyoeWaves() {
         <ambientLight intensity={0.5} />
         <WaveMesh />
         {/* TODO implement physics for the fin */}
-        {/* <SharkFin /> */}
+        <SharkFin />
       </Canvas>
     </div>
   );

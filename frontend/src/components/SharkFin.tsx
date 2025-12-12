@@ -1,58 +1,73 @@
+// frontend/src/components/SharkFin.tsx
 import { useGLTF } from '@react-three/drei';
 import { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 const SharkFin = () => {
-  const { scene } = useGLTF('/models/shark_fin.glb');
-  const finRef = useRef<THREE.Group>(null); // Use THREE.Group if your model is a group of meshes
-  const [targetScale, setTargetScale] = useState(0); // Starts hidden
-  const [position, setPosition] = useState<[number, number, number]>([0, 0, 0]);
+  const { scene } = useGLTF('/models/shark_fin.glb'); // Assuming this path is now correct
+  const finRef = useRef<THREE.Group>(null);
+  const [initialY, setInitialY] = useState(0); // For random vertical track
+  const [speed, setSpeed] = useState(0.01); // Speed of horizontal movement
+
+  const surfaceOffset = 0.015;
+  // Variables for controlling fin's horizontal position
+  const startX = -3; // Off-screen left
+  const endX = 3;   // Off-screen right
+  const resetX = -3; // Where it resets after going off-screen right
 
   useEffect(() => {
-    // Clone the scene to avoid modifying the original GLTF asset if multiple fins are rendered
+    // Clone the scene only once on mount
     const clonedScene = scene.clone();
     if (finRef.current) {
       finRef.current.add(clonedScene);
+      // Set initial scale to 0 so it's invisible until it enters
+      finRef.current.scale.set(0, 0, 0);
+      // Set initial position off-screen left with a random Y
+      finRef.current.position.set(startX, (Math.random() - 0.5) * 1.25, 0); // Random Y
     }
+    setInitialY((Math.random() - 0.5) * 1.25); // Store random Y for potential use, or use position directly
+    setSpeed(0.005 + Math.random() * 0.01); // Randomize speed slightly
+  }, [scene, startX]); // Ensure effect runs only once or when scene changes
 
-    const interval = setInterval(() => {
-      setTargetScale(prev => (prev === 0 ? 0.1 : 0)); // Toggle visibility
-      // Only set new position when it's about to appear
-      if (targetScale === 0) { // If it was hidden, and is now becoming visible
-        const x = (Math.random() - 0.5) * 5;
-        const y = (Math.random() - 0.5) * 5;
-        setPosition([x, y, 0]); // Z will be calculated in useFrame
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [targetScale, scene]);
-
-  useFrame((state) => { // 'state' contains time information
+  useFrame((state, delta) => {
     if (finRef.current) {
-      // Smoothly interpolate scale (as described above)
-      // finRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+      const currentTime = state.clock.elapsedTime;
 
-      const currentTime = state.clock.elapsedTime; // Get current time
+      // 1. Horizontal Movement (Left to Right)
+      finRef.current.position.x += speed; // Move the fin to the right
 
-      // Get the current X and Y position of the fin
+      // 2. Wrap Around (Reset to left when off-screen right)
+      if (finRef.current.position.x > endX) {
+        finRef.current.position.x = resetX;
+        finRef.current.position.y = (Math.random() - 0.5) * 3; // New random Y when it resets
+        setSpeed(0.005 + Math.random() * 0.01); // New random speed
+      }
+
+      // 3. Wave Following (Z-position)
       const currentX = finRef.current.position.x;
       const currentY = finRef.current.position.y;
 
-      // Replicate the wave elevation calculation from UkiyoeShaderMaterial (lines 59-64 of UkiyoeWaves.tsx)
+      // Replicate the wave elevation calculation from UkiyoeShaderMaterial
       let elevation = Math.sin(currentX * 2.0 + currentTime * 0.2) * 0.2;
       elevation += Math.sin(currentY * 3.0 + currentTime * 0.1) * 0.1;
       elevation += Math.sin(currentY * 10.0 - currentTime * 0.5) * 0.05;
 
-      // Apply a small offset so the fin appears above the water surface
-      const surfaceOffset = 0.05; // Adjust this value as needed
-      finRef.current.position.z = elevation + surfaceOffset;
+      finRef.current.position.z = elevation + surfaceOffset; // Now surfaceOffset is accessible
+
+      // 4. Smooth Appearance/Disappearance (Scaling based on X position)
+      const visibleRange = 4; // How far into the screen it should be fully visible
+      let targetScale = 0;
+      if (finRef.current.position.x > startX + 0.5 && finRef.current.position.x < endX - 0.5) {
+        targetScale = 0.1; // Fully visible scale
+      }
+
+      // Smoothly interpolate the scale
+      finRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
     }
   });
 
-  return (
-    <group ref={finRef} position={position} />
-  );
+  return <group ref={finRef} />;
 };
- export default SharkFin;
+
+export default SharkFin;
