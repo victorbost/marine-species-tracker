@@ -7,7 +7,7 @@ export async function middleware(request: NextRequest) {
     pathname === "/sign-in" ||
     pathname === "/sign-up" ||
     pathname.startsWith("/_next/") ||
-    pathname.startsWith("/models/") 
+    pathname.startsWith("/models/")
   ) {
     return NextResponse.next();
   }

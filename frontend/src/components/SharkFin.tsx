@@ -1,20 +1,19 @@
 // frontend/src/components/SharkFin.tsx
-import { useGLTF } from '@react-three/drei';
-import { useRef, useState, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
+import { useGLTF } from "@react-three/drei";
+import { useRef, useState, useEffect } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
-const SharkFin = () => {
-  const { scene } = useGLTF('/models/shark_fin.glb'); // Assuming this path is now correct
+function SharkFin() {
+  const { scene } = useGLTF("/models/shark_fin.glb"); // Assuming this path is now correct
   const finRef = useRef<THREE.Group>(null);
-  const [initialY, setInitialY] = useState(0); // For random vertical track
   const [speed, setSpeed] = useState(0.01); // Speed of horizontal movement
-
+  const fixedY = 0;
   const surfaceOffset = 0.015;
   // Variables for controlling fin's horizontal position
-  const startX = -3; // Off-screen left
-  const endX = 3;   // Off-screen right
-  const resetX = -3; // Where it resets after going off-screen right
+  const startX = -5; // Off-screen left
+  const endX = 5; // Off-screen right
+  const resetX = -5; // Where it resets after going off-screen right
 
   useEffect(() => {
     // Clone the scene only once on mount
@@ -24,13 +23,13 @@ const SharkFin = () => {
       // Set initial scale to 0 so it's invisible until it enters
       finRef.current.scale.set(0, 0, 0);
       // Set initial position off-screen left with a random Y
-      finRef.current.position.set(startX, (Math.random() - 0.5) * 1.25, 0); // Random Y
+      finRef.current.position.set(startX, fixedY, 0); // Random Y
     }
-    setInitialY((Math.random() - 0.5) * 1.25); // Store random Y for potential use, or use position directly
+    // setInitialY((Math.random() - 0.5) * 1.25); // Store random Y for potential use, or use position directly
     setSpeed(0.005 + Math.random() * 0.01); // Randomize speed slightly
-  }, [scene, startX]); // Ensure effect runs only once or when scene changes
+  }, [scene, startX, fixedY]); // Ensure effect runs only once or when scene changes
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (finRef.current) {
       const currentTime = state.clock.elapsedTime;
 
@@ -40,7 +39,7 @@ const SharkFin = () => {
       // 2. Wrap Around (Reset to left when off-screen right)
       if (finRef.current.position.x > endX) {
         finRef.current.position.x = resetX;
-        finRef.current.position.y = (Math.random() - 0.5) * 3; // New random Y when it resets
+        finRef.current.position.y = fixedY;
         setSpeed(0.005 + Math.random() * 0.01); // New random speed
       }
 
@@ -56,18 +55,23 @@ const SharkFin = () => {
       finRef.current.position.z = elevation + surfaceOffset; // Now surfaceOffset is accessible
 
       // 4. Smooth Appearance/Disappearance (Scaling based on X position)
-      const visibleRange = 4; // How far into the screen it should be fully visible
       let targetScale = 0;
-      if (finRef.current.position.x > startX + 0.5 && finRef.current.position.x < endX - 0.5) {
+      if (
+        finRef.current.position.x > startX + 0.5 &&
+        finRef.current.position.x < endX - 0.5
+      ) {
         targetScale = 0.1; // Fully visible scale
       }
 
       // Smoothly interpolate the scale
-      finRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+      finRef.current.scale.lerp(
+        new THREE.Vector3(targetScale, targetScale, targetScale),
+        0.1,
+      );
     }
   });
 
   return <group ref={finRef} />;
-};
+}
 
 export default SharkFin;

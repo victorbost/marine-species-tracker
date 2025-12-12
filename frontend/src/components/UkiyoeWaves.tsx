@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useRef, useEffect, useMemo } from "react";
+import React, { useRef, useEffect } from "react";
 import { Canvas, useFrame, extend } from "@react-three/fiber";
 import { shaderMaterial } from "@react-three/drei";
 import * as THREE from "three";
-import SharkFin from "./SharkFin"
+import SharkFin from "./SharkFin";
 
 const useBrandColors = () => {
   // Default fallback colors (in case CSS hasn't loaded yet)
@@ -118,7 +118,6 @@ function WaveMesh() {
     // Rotate to face camera slightly
     <mesh rotation={[-Math.PI / 3, 0, 0]} scale={1.5}>
       <planeGeometry args={[10, 10, 128, 128]} />
-      {/* We pass the initial colors, but useFrame lerps them for smoothness */}
       <ukiyoeShaderMaterial
         ref={materialRef}
         side={THREE.DoubleSide}

@@ -59,7 +59,20 @@
       "specialLink": ["hrefLeft", "hrefRight"],
       "aspects": ["invalidHref", "preferButton"]
     }],
-    "react/require-default-props": "off"
+    "react/require-default-props": "off",
+    "react/no-unknown-property": ["error", {
+      "ignore": [
+        "args",
+        "side",
+        "uColorStart",
+        "uColorEnd",
+        "intensity",
+        "rotation",
+        "position",
+        "scale",
+        "attach" // Common for R3F, though not in your current errors
+      ]
+    }]
   },
   "overrides": [
     {
@@ -76,6 +89,17 @@
       "rules": {
         "@typescript-eslint/no-explicit-any": "off",
         "react/jsx-props-no-spreading": "off"
+      }
+    },
+    {
+      "files": ["src/types/r3f.d.ts"],
+      "rules": {
+        "prettier/prettier": "off",
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "react/no-unknown-property": "off",
+        "@typescript-eslint/triple-slash-reference": "off",
+         "no-undef": "off"
       }
     }
   ],
