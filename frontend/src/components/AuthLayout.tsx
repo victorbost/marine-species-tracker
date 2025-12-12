@@ -3,7 +3,7 @@
 "use client";
 
 import React from "react";
-import LiquidChrome from "./LiquidChrome";
+import UkiyoeWaves from "./UkiyoeWaves";
 
 export default function AuthLayout({
   children,
@@ -14,7 +14,7 @@ export default function AuthLayout({
     <div className="relative w-full min-h-screen overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 -z-10">
-        <LiquidChrome />
+        <UkiyoeWaves />
       </div>
 
       {/* Centered auth box */}
