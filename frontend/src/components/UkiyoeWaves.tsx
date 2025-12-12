@@ -4,31 +4,28 @@ import React, { useRef, useEffect, useMemo } from "react";
 import { Canvas, useFrame, extend } from "@react-three/fiber";
 import { shaderMaterial } from "@react-three/drei";
 import * as THREE from "three";
+// import SharkFin from "./SharkFin"
 
-// 1. Helper to parse Tailwind CSS variables into Three.js Colors
 const useBrandColors = () => {
   // Default fallback colors (in case CSS hasn't loaded yet)
   const [colors, setColors] = React.useState({
-    start: new THREE.Color("#0f172a"), // Fallback dark
-    end: new THREE.Color("#38bdf8"),   // Fallback light
+    start: new THREE.Color("#0f172a"),
+    end: new THREE.Color("#38bdf8"),
   });
 
   useEffect(() => {
     // Function to get the computed value of a CSS variable
     const getVar = (name: string) => {
       if (typeof window === "undefined") return "";
-      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return getComputedStyle(document.documentElement)
+        .getPropertyValue(name)
+        .trim();
     };
 
-    // Grab your specific brand variables
-    // We assume the variable contains HSL channels like "215 25% 27%"
-    // or fully formatted colors depending on your setup.
     const primary900 = getVar("--brand-primary-900");
     const primary500 = getVar("--brand-primary-500");
 
     if (primary900 && primary500) {
-      // Three.js can parse "hsl(215, 25%, 27%)" strings.
-      // We reconstruct the CSS string safely.
       setColors({
         start: new THREE.Color(`hsl(${primary900.replaceAll(" ", ",")})`),
         end: new THREE.Color(`hsl(${primary500.replaceAll(" ", ",")})`),
@@ -39,12 +36,11 @@ const useBrandColors = () => {
   return colors;
 };
 
-// 2. Define the Shader Material
 const UkiyoeShaderMaterial = shaderMaterial(
   {
     uTime: 0,
-    uColorStart: new THREE.Color("#000000"), // Will be overwritten by props
-    uColorEnd: new THREE.Color("#ffffff"),   // Will be overwritten by props
+    uColorStart: new THREE.Color("#000000"),
+    uColorEnd: new THREE.Color("#ffffff"),
   },
   // Vertex Shader (Geometry / Movement)
   `
@@ -83,15 +79,28 @@ const UkiyoeShaderMaterial = shaderMaterial(
       // Interpolate between the Deep color (900) and Crest color (500)
       vec3 color = mix(uColorStart, uColorEnd, mixStrength);
 
+      // Define a foam color (white)
+      vec3 foamColor = vec3(1.0, 1.0, 1.0);
+
+      // Define a threshold for foam (e.g., when elevation is high)
+      float foamThreshold = 0.3;
+
+      // If the elevation is above the threshold, mix in some foam color
+      if (vElevation > foamThreshold) {
+        // A simple linear mix. You could use smoother functions for more realistic foam.
+        float foamIntensity = smoothstep(foamThreshold, foamThreshold + 0.1, vElevation);
+        color = mix(color, foamColor, foamIntensity);
+      }
+
       gl_FragColor = vec4(color, 1.0);
     }
-  `
+  `,
 );
 
 extend({ UkiyoeShaderMaterial });
 
 // 3. The Wave Mesh Component
-const WaveMesh = () => {
+function WaveMesh() {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const { start, end } = useBrandColors();
 
@@ -118,19 +127,21 @@ const WaveMesh = () => {
       />
     </mesh>
   );
-};
+}
 
 // 4. Main Export
-const UkiyoeWaves = () => {
+function UkiyoeWaves() {
   return (
     // Use the darkest brand color for the container background to avoid white flashes
     <div className="absolute inset-0 w-full h-full okinawa-dawn">
       <Canvas camera={{ position: [0, 0, 2.5], fov: 75 }}>
         <ambientLight intensity={0.5} />
         <WaveMesh />
+        {/* TODO implement physics for the fin */}
+        {/* <SharkFin /> */}
       </Canvas>
     </div>
   );
-};
+}
 
 export default UkiyoeWaves;
