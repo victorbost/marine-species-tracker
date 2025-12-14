@@ -17,22 +17,17 @@ class ObservationListCreateView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid(
-            raise_exception=False
-        ):  # Crucially, set raise_exception to False
+        if not serializer.is_valid(raise_exception=False):
             return Response(
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # If valid, proceed with saving (which will call perform_create)
         return super().create(request, *args, **kwargs)
 
     def get_queryset(self):
         return Observation.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        # This perform_create will now only be called if serializer.is_valid() was true above.
-        # So we can remove the print statement here.
         serializer.save(user=self.request.user)
 
 
@@ -80,7 +75,6 @@ class ObservationValidateView(APIView):
         return Response(ObservationGeoSerializer(obs).data)
 
 
-# List curated/external (OBIS) only
 class CuratedObservationListView(generics.ListAPIView):
     serializer_class = ObservationGeoSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]

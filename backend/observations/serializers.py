@@ -88,11 +88,14 @@ class ObservationGeoSerializer(GeoFeatureModelSerializer):
             if not user or not (
                 user.is_staff or getattr(user, "role", None) == "researcher"
             ):
-                raise serializers.ValidationError({
-                    "validated": (
-                        "You do not have permission to validate observations."
-                    )
-                })
+                raise serializers.ValidationError(
+                    {
+                        "validated": (
+                            "You do not have permission to validate"
+                            " observations."
+                        )
+                    }
+                )
         updated_instance = super().update(instance, validated_data)
         updated_instance.save()
 
