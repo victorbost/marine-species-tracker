@@ -23,6 +23,7 @@ const signupSchema = z.object({
 export default function SignupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const router = useRouter();
 
   const signupFields: FormField[] = [
@@ -59,6 +60,7 @@ export default function SignupPage() {
     async (values: z.infer<typeof signupSchema>) => {
       setLoading(true);
       setError("");
+      setSuccess(false);
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -72,7 +74,7 @@ export default function SignupPage() {
         });
 
         if (res.ok) {
-          router.replace("/sign-in");
+          setSuccess(true);
         } else {
           const errorData = await res.json();
           // eslint-disable-next-line no-console
@@ -97,8 +99,46 @@ export default function SignupPage() {
         setLoading(false);
       }
     },
-    [setLoading, setError, router],
+    [setLoading, setError],
   );
+
+  if (success) {
+    return (
+      <AuthLayout>
+        <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg">
+          <h2 className="text-3xl font-bold text-center text-gray-900">
+            Check Your Email
+          </h2>
+          <div className="space-y-4">
+            <p className="text-center text-gray-600">
+              We&apos;ve sent you a verification email. Please check your inbox
+              and click the verification link to activate your account.
+            </p>
+            <p className="text-center text-sm text-gray-500">
+              Didn&apos;t receive the email? Check your spam folder or{" "}
+              <button
+                type="button"
+                onClick={() => setSuccess(false)}
+                className="text-blue-600 hover:underline"
+              >
+                try again
+              </button>
+              .
+            </p>
+          </div>
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => router.push("/sign-in")}
+              className="text-gray-600 hover:underline text-sm"
+            >
+              Back to Sign In
+            </button>
+          </div>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout>

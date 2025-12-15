@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  // Exclude login, password reset, and static public routes
+  // Exclude login, password reset, email verification, and static public routes
   if (
     pathname === "/sign-in" ||
     pathname === "/sign-up" ||
     pathname === "/forgot-password" ||
+    pathname === "/verify-email" ||
     pathname.startsWith("/reset-password/") ||
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/models/")

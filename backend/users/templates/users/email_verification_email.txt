@@ -1,0 +1,11 @@
+Hello {{ user.get_username }},
+
+Thank you for registering with Marine Species Tracker! To complete your registration, please verify your email address by clicking the link below:
+
+{{ verification_url }}
+
+This link will expire in 24 hours.
+
+If you did not create an account with us, please ignore this email.
+
+Thanks for using our site!

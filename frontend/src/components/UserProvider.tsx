@@ -58,6 +58,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           pathname !== "/sign-in" &&
           pathname !== "/sign-up" &&
           pathname !== "/forgot-password" &&
+          pathname !== "/verify-email" &&
           !pathname.startsWith("/reset-password/")
         ) {
           router.push("/sign-in");
@@ -70,6 +71,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         pathname !== "/sign-in" &&
         pathname !== "/sign-up" &&
         pathname !== "/forgot-password" &&
+        pathname !== "/verify-email" &&
         !pathname.startsWith("/reset-password/")
       ) {
         router.push("/sign-in");
@@ -84,6 +86,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       pathname !== "/sign-in" &&
       pathname !== "/sign-up" &&
       pathname !== "/forgot-password" &&
+      pathname !== "/verify-email" &&
       !pathname.startsWith("/reset-password/")
     ) {
       fetchUser();

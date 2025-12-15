@@ -56,4 +56,9 @@ urlpatterns = [
         views.PasswordResetConfirmAPIView.as_view(),
         name="api_password_reset_confirm",
     ),
+    path(
+        "verify-email/",
+        views.EmailVerificationAPIView.as_view(),
+        name="api_email_verification",
+    ),
 ]

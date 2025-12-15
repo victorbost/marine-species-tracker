@@ -57,6 +57,17 @@ export default function SigninPage() {
         if (res.ok) {
           await refetchUser();
           router.replace("/");
+        } else if (res.status === 401) {
+          // Check if account needs email verification
+          const errorData = await res.json().catch(() => ({}));
+          if (
+            errorData.detail?.includes("verify") ||
+            errorData.detail?.includes("email")
+          ) {
+            setError("Please verify your email address before signing in.");
+          } else {
+            setError("Invalid credentials");
+          }
         } else {
           const text = await res.text();
           console.error("Sign in fail, status:", res.status, "body:", text); // eslint-disable-line no-console
@@ -86,6 +97,7 @@ export default function SigninPage() {
         linkHref="/sign-up"
         additionalLinks={[
           { text: "Forgot Password?", href: "/forgot-password" },
+          { text: "Need to verify email?", href: "/verify-email" },
         ]}
         cardClass="w-full max-w-md p-8 space-y-6 bg-white rounded-lg"
       />

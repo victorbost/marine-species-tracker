@@ -183,6 +183,7 @@ This backend implements a **custom user model** (see `users/` app) with role sup
 | `/api/v1/auth/login/`         | POST   | User login, sets JWT cookie    | No  |
 | `/api/v1/auth/logout/`        | POST   | Removes JWT cookie (logout)    | Yes |
 | `/api/v1/auth/profiles/me/`   | GET    | Current user's profile         | Yes |
+| `/api/v1/auth/verify-email/`  | POST   | Verify user email with token   | No  |
 | `/api/v1/auth/password-reset/` | POST  | Request password reset email   | No  |
 | `/api/v1/auth/password-reset/confirm/` | POST | Confirm password reset with new password | No  |
 
@@ -228,6 +229,44 @@ The backend includes a complete password reset system that sends secure reset li
 
 Comprehensive tests are available in `users/test_users.py` covering:
 - Successful password reset requests and confirmations
+
+### Email Verification Flow
+
+The backend includes email verification for new user accounts. Users must verify their email address before they can sign in.
+
+#### How It Works
+
+1. **User Registration**: User submits registration form to `/api/v1/auth/register/`
+   - Creates an inactive user account
+   - Generates a secure verification token
+   - Sends verification email with link containing token
+   - Registration response indicates email verification is required
+
+2. **Email Verification**: User clicks verification link or enters token manually
+   - POST to `/api/v1/auth/verify-email/` with token
+   - Activates user account and marks email as verified
+   - User can now sign in
+
+3. **Login Protection**: Attempting to login with unverified email shows appropriate error message
+
+#### Security Features
+- Verification tokens expire after 24 hours
+- Tokens are cryptographically secure (32-byte URL-safe)
+- Users must be inactive and unverified to use verification endpoint
+- Failed verification attempts don't reveal token validity
+
+#### Existing Users
+Existing users created before email verification was implemented remain active and can continue logging in. To maintain consistency, you can mark existing users as verified:
+
+```bash
+# Using Django management command (recommended)
+docker-compose exec backend python manage.py mark_existing_users_verified
+
+# Or using the shell script
+docker-compose exec backend python manage.py shell < scripts/mark_existing_users_verified.py
+```
+
+The management command supports `--dry-run` and `--created-before` options for safer updates.
 - Invalid email handling
 - Invalid token/UID validation
 - Password mismatch detection
