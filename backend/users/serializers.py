@@ -1,4 +1,5 @@
 import base64
+import secrets
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -8,6 +9,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.conf import settings
+from django.utils import timezone
 
 from observations.serializers import ObservationGeoSerializer
 
@@ -23,13 +25,62 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ("id", "email", "password", "username", "role")
 
     def create(self, validated_data):
+        # Create inactive user
         user = User.objects.create_user(
             email=validated_data["email"],
             username=validated_data["username"],
             password=validated_data["password"],
             role=validated_data["role"],
+            is_active=False,  # User is inactive until email is verified
         )
+
+        # Generate verification token
+        verification_token = secrets.token_urlsafe(32)
+        user.email_verification_token = verification_token
+        user.email_verification_token_created = timezone.now()
+        user.save()
+
+        # Send verification email
+        self._send_verification_email(user, verification_token)
+
         return user
+
+    def _send_verification_email(self, user, token):
+        """Send email verification link to user"""
+        # Environment-specific domain logic
+        if settings.DEBUG:
+            current_site_domain = "localhost:3000"
+            protocol = "http"
+        else:
+            current_site_domain = "species-tracker.kuroshio-lab.com"
+            protocol = "https"
+
+        verification_url = (
+            f"{protocol}://{current_site_domain}/verify-email?token={token}"
+        )
+
+        email_context = {
+            "user": user,
+            "verification_url": verification_url,
+            "protocol": protocol,
+            "domain": current_site_domain,
+        }
+
+        email_html_message = render_to_string(
+            "users/email_verification_email.html", email_context
+        )
+        email_plain_message = render_to_string(
+            "users/email_verification_email.txt", email_context
+        )
+
+        send_mail(
+            subject="Verify Your Email Address",
+            message=email_plain_message,
+            html_message=email_html_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -40,10 +91,17 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "username",
             "role",
+            "email_verified",
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "role", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "role",
+            "email_verified",
+            "created_at",
+            "updated_at",
+        )
 
 
 class UserProfileSerializer(UserSerializer):
@@ -55,6 +113,9 @@ class UserProfileSerializer(UserSerializer):
             "observation_count",
             "observations",
         )
+
+    def get_observation_count(self, obj):
+        return obj.observations.count()
 
     def get_observation_count(self, obj):
         return obj.observations.count()
@@ -83,6 +144,12 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             raise serializers.ValidationError("No user with this email.")
+
+        # Check if user is active (email verified)
+        if not user.is_active:
+            raise serializers.ValidationError(
+                "Please verify your email address before signing in."
+            )
 
         attrs["username"] = user.username  # SimpleJWT expects 'username'
         return super().validate(attrs)
@@ -203,3 +270,39 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {"token": "The reset link is invalid or has expired."}
             )
+
+
+class EmailVerificationSerializer(serializers.Serializer):
+    token = serializers.CharField(required=True)
+
+    def validate_token(self, value):
+        try:
+            user = User.objects.get(
+                email_verification_token=value,
+                is_active=False,
+                email_verified=False,
+            )
+
+            # Check if token is expired (24 hours)
+            if user.email_verification_token_created:
+                token_age = (
+                    timezone.now() - user.email_verification_token_created
+                )
+                if token_age.total_seconds() > 24 * 60 * 60:  # 24 hours
+                    raise serializers.ValidationError(
+                        "Verification token has expired."
+                    )
+
+            return value
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid verification token.")
+
+    def save(self):
+        token = self.validated_data["token"]
+        user = User.objects.get(email_verification_token=token)
+        user.is_active = True
+        user.email_verified = True
+        user.email_verification_token = None
+        user.email_verification_token_created = None
+        user.save()
+        return user

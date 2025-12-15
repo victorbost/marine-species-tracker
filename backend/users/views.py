@@ -13,6 +13,7 @@ from .serializers import (
     UserSerializer,
     PasswordResetRequestSerializer,
     PasswordResetConfirmSerializer,
+    EmailVerificationSerializer,
 )
 
 
@@ -128,5 +129,19 @@ class PasswordResetConfirmAPIView(generics.GenericAPIView):
         user = serializer.save()
         return Response(
             {"detail": "Password has been reset with the new password."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class EmailVerificationAPIView(generics.GenericAPIView):
+    serializer_class = EmailVerificationSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(
+            {"detail": "Email has been verified successfully."},
             status=status.HTTP_200_OK,
         )
