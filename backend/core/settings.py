@@ -59,6 +59,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "core.urls"
 
+# Password reset settings
+PASSWORD_RESET_TIMEOUT = 259200  # 3 days in seconds
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -95,7 +98,9 @@ AUTH_USER_MODEL = "users.User"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+        "NAME": (
+            "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+        )
     },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {
@@ -217,6 +222,21 @@ if USE_S3:
     AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
+# =============================================================================
+# AWS Simple Email Service (SES) Configuration
+# =============================================================================
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "email-smtp.eu-west-3.amazonaws.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv("SES_EMAIL_HOST_USER_LOCAL")
+EMAIL_HOST_PASSWORD = os.getenv("SES_EMAIL_HOST_PASSWORD_LOCAL")
+
+# The default 'From' address for all emails sent by Django (e.g., password resets)
+DEFAULT_FROM_EMAIL = "Kuroshio Lab Notifications <no-reply@kuroshio-lab.com>"
+
+# The address for error messages sent to ADMINS (optional, can be same as above)
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 # =============================================================================
 # Silence drf_yasg format deprecation warning:
 # =============================================================================

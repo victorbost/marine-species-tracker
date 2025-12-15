@@ -10,6 +10,8 @@ class TestUserAuth:
     user_url = "/api/v1/auth/user/"
     refresh_url = "/api/v1/auth/refresh/"
     profile_me_url = "/api/v1/auth/profiles/me/"
+    password_reset_request_url = "/api/v1/auth/password-reset/"
+    password_reset_confirm_url = "/api/v1/auth/password-reset/confirm/"
 
     @pytest.fixture
     def client(self):
@@ -167,7 +169,6 @@ class TestUserAuth:
             "observation_datetime": "2024-10-29T12:00:00Z",
             "location": "POINT(1.0 2.0)",
             "location_name": "Test Reef",
-            "depth": 5.0,
             "temperature": 20.2,
             "visibility": 15.1,
             "notes": "Test observation note",
@@ -252,3 +253,148 @@ class TestUserAuth:
         observed_species = [f["properties"]["species_name"] for f in features]
         assert "Test Fish" in observed_species
         assert "Shark" in observed_species
+
+    def test_password_reset_request_success(self, client, register_user):
+        """Test successful password reset request"""
+        payload = {"email": "user@example.com"}
+        resp = client.post(
+            self.password_reset_request_url, payload, format="json"
+        )
+        assert resp.status_code == 200
+        assert resp.data["detail"] == "Password reset email has been sent."
+
+    def test_password_reset_request_invalid_email(self, client):
+        """Test password reset request with non-existent email"""
+        payload = {"email": "nonexistent@example.com"}
+        resp = client.post(
+            self.password_reset_request_url, payload, format="json"
+        )
+        assert resp.status_code == 400
+        assert "email" in resp.data
+
+    def test_password_reset_confirm_success(self, client, register_user):
+        """Test successful password reset confirmation"""
+        from django.contrib.auth.tokens import default_token_generator
+        from django.utils.http import urlsafe_base64_encode
+        from django.utils.encoding import force_bytes
+
+        # Get user and generate valid token/uid
+        user = register_user  # The register_user fixture creates a user
+        # Actually need to get the User model instance
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        test_user = User.objects.get(email="user@example.com")
+
+        token = default_token_generator.make_token(test_user)
+        uidb64 = urlsafe_base64_encode(force_bytes(str(test_user.pk)))
+
+        payload = {
+            "uidb64": uidb64,
+            "token": token,
+            "new_password": "NewSecurePass123!",
+            "re_new_password": "NewSecurePass123!",
+        }
+        resp = client.post(
+            self.password_reset_confirm_url, payload, format="json"
+        )
+        assert resp.status_code == 200
+        assert (
+            resp.data["detail"]
+            == "Password has been reset with the new password."
+        )
+
+        # Verify password actually changed
+        test_user.refresh_from_db()
+        assert test_user.check_password("NewSecurePass123!")
+
+    def test_password_reset_confirm_invalid_token(self, client, register_user):
+        """Test password reset confirmation with invalid token"""
+        from django.utils.http import urlsafe_base64_encode
+        from django.utils.encoding import force_bytes
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        test_user = User.objects.get(email="user@example.com")
+
+        uidb64 = urlsafe_base64_encode(force_bytes(str(test_user.pk)))
+
+        payload = {
+            "uidb64": uidb64,
+            "token": "invalid-token-123",
+            "new_password": "NewSecurePass123!",
+            "re_new_password": "NewSecurePass123!",
+        }
+        resp = client.post(
+            self.password_reset_confirm_url, payload, format="json"
+        )
+        assert resp.status_code == 400
+        assert "token" in resp.data
+
+    def test_password_reset_confirm_invalid_uidb64(self, client):
+        """Test password reset confirmation with invalid uidb64"""
+        payload = {
+            "uidb64": "invalid-uidb64",
+            "token": "some-token",
+            "new_password": "NewSecurePass123!",
+            "re_new_password": "NewSecurePass123!",
+        }
+        resp = client.post(
+            self.password_reset_confirm_url, payload, format="json"
+        )
+        assert resp.status_code == 400
+        assert "token" in resp.data
+
+    def test_password_reset_confirm_mismatched_passwords(
+        self, client, register_user
+    ):
+        """Test password reset confirmation with mismatched passwords"""
+        from django.contrib.auth.tokens import default_token_generator
+        from django.utils.http import urlsafe_base64_encode
+        from django.utils.encoding import force_bytes
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        test_user = User.objects.get(email="user@example.com")
+
+        token = default_token_generator.make_token(test_user)
+        uidb64 = urlsafe_base64_encode(force_bytes(str(test_user.pk)))
+
+        payload = {
+            "uidb64": uidb64,
+            "token": token,
+            "new_password": "NewSecurePass123!",
+            "re_new_password": "DifferentPassword456!",  # Mismatched
+        }
+        resp = client.post(
+            self.password_reset_confirm_url, payload, format="json"
+        )
+        assert resp.status_code == 400
+        assert "new_password" in resp.data
+
+    def test_password_reset_confirm_password_too_short(
+        self, client, register_user
+    ):
+        """Test password reset confirmation with password too short"""
+        from django.contrib.auth.tokens import default_token_generator
+        from django.utils.http import urlsafe_base64_encode
+        from django.utils.encoding import force_bytes
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        test_user = User.objects.get(email="user@example.com")
+
+        token = default_token_generator.make_token(test_user)
+        uidb64 = urlsafe_base64_encode(force_bytes(str(test_user.pk)))
+
+        payload = {
+            "uidb64": uidb64,
+            "token": token,
+            "new_password": "short",  # Too short (< 8 characters)
+            "re_new_password": "short",
+        }
+        resp = client.post(
+            self.password_reset_confirm_url, payload, format="json"
+        )
+        assert resp.status_code == 400
+        assert "new_password" in resp.data or "re_new_password" in resp.data

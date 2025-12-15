@@ -1,15 +1,18 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model, logout
-from rest_framework import generics, permissions
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import AllowAny
 
 from .serializers import (
     EmailTokenObtainPairSerializer,
     RegisterSerializer,
     UserProfileSerializer,
     UserSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
 )
 
 
@@ -95,3 +98,35 @@ class LogoutView(APIView):
         )
 
         return resp
+
+
+class PasswordResetAPIView(generics.GenericAPIView):
+    serializer_class = PasswordResetRequestSerializer
+    permission_classes = (
+        AllowAny,
+    )  # Uncomment if you want to allow unauthenticated access
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"detail": "Password reset email has been sent."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetConfirmAPIView(generics.GenericAPIView):
+    serializer_class = PasswordResetConfirmSerializer
+    permission_classes = (
+        AllowAny,
+    )  # Uncomment if you want to allow unauthenticated access
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(
+            {"detail": "Password has been reset with the new password."},
+            status=status.HTTP_200_OK,
+        )

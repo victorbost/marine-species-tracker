@@ -45,7 +45,6 @@ def make_observation(client, location, notes=""):
         "species_name": "TestFish",
         "observation_datetime": "2025-11-01T12:00:00Z",
         "location_name": "Test Water",
-        "depth": 20,
         "temperature": 18.5,
         "visibility": 12,
         "notes": notes,

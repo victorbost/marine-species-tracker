@@ -84,6 +84,9 @@ export default function SigninPage() {
         loading={isLoading}
         linkText="Don't have an account yet?"
         linkHref="/sign-up"
+        additionalLinks={[
+          { text: "Forgot Password?", href: "/forgot-password" },
+        ]}
         cardClass="w-full max-w-md p-8 space-y-6 bg-white rounded-lg"
       />
     </AuthLayout>

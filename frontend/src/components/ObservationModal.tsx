@@ -238,6 +238,7 @@ export default function ObservationModal({
           notes: data.notes ?? null,
           sex: data.sex ?? "unknown",
           userId: user.id,
+          username: user.username,
         };
         await createObservation(newObservationData);
       }

@@ -16,6 +16,7 @@ export async function fetchUserObservations(): Promise<Observation[]> {
     const observations: Observation[] = geoJsonFeatures.map((feature) => ({
       id: Number(feature.id),
       userId: feature.properties.userId,
+      username: feature.properties.username ?? null,
       speciesName: feature.properties.speciesName,
       commonName: feature.properties.commonName ?? null,
       location: feature.geometry,

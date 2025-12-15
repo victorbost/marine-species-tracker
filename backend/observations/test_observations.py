@@ -56,7 +56,6 @@ class ObservationAPITestCase(APITestCase):
             "location": {"type": "Point", "coordinates": [52.505, 14.404]},
             "observation_datetime": "2025-10-21T13:45:00Z",
             "location_name": "Pacific Point",
-            "depth": 30,
             "temperature": 20.5,
             "visibility": 10,
             "notes": "Saw dorsal fin.",

@@ -183,10 +183,60 @@ This backend implements a **custom user model** (see `users/` app) with role sup
 | `/api/v1/auth/login/`         | POST   | User login, sets JWT cookie    | No  |
 | `/api/v1/auth/logout/`        | POST   | Removes JWT cookie (logout)    | Yes |
 | `/api/v1/auth/profiles/me/`   | GET    | Current user's profile         | Yes |
+| `/api/v1/auth/password-reset/` | POST  | Request password reset email   | No  |
+| `/api/v1/auth/password-reset/confirm/` | POST | Confirm password reset with new password | No  |
 
 **Login/Logout flow uses JWTs in cookies:**
 - Tokens are validated by custom middleware on every protected API call, including logout.
 - All protected endpoints (`IsAuthenticated`) require the `access_token` cookie.
+
+### Password Reset Flow
+
+The backend includes a complete password reset system that sends secure reset links via email and allows users to set new passwords. This system is designed to work with a frontend application that handles the user interface for password reset forms.
+
+#### How It Works
+
+1. **Password Reset Request**: User submits their email address to `/api/v1/auth/password-reset/`
+   - Backend validates the email exists in the system
+   - Generates a secure, time-limited token and user ID (base64 encoded)
+   - Sends an email with a reset link containing the token and user ID
+   - The reset link format is: `https://your-frontend-domain/reset-password/{uidb64}/{token}/`
+
+2. **Password Reset Confirmation**: User clicks the email link and submits a new password to `/api/v1/auth/password-reset/confirm/`
+   - Backend validates the token and user ID
+   - Ensures new passwords match (confirmation field)
+   - Updates the user's password in the database
+   - Invalidates the reset token (one-time use only)
+
+#### Email Configuration
+
+- Uses AWS SES for production email sending (configured in `core/settings.py`)
+- Includes both HTML and plain text email templates
+- Environment-specific domain configuration (localhost for development, production domain for live)
+- Email templates are located in `users/templates/users/`
+
+#### Security Features
+
+- Tokens are cryptographically secure and time-limited (Django's `default_token_generator`)
+- User IDs are base64 encoded for URL safety
+- Passwords must be at least 8 characters long
+- New password confirmation required
+- Invalid tokens return generic error messages (prevents email enumeration)
+- All reset endpoints are public (no authentication required)
+
+#### Testing
+
+Comprehensive tests are available in `users/test_users.py` covering:
+- Successful password reset requests and confirmations
+- Invalid email handling
+- Invalid token/UID validation
+- Password mismatch detection
+- Password length validation
+
+Run password reset tests with:
+```bash
+docker-compose exec backend pytest backend/users/test_users.py -k "password_reset"
+```
 
 ### Roles & Permissions
 - Custom roles can be added/managed in `users/models.py` for future admin/moderator logic.
