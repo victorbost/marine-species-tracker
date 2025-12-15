@@ -92,8 +92,10 @@ export default function ShadcnDynamicForm<T extends FieldValues>({
   linkHref,
   defaultValues,
   cardClass = "w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md",
+  additionalLinks,
 }: DynamicFormProps<T> & {
   cardClass?: string;
+  additionalLinks?: Array<{ text: string; href: string }>;
 }) {
   const form = useForm<T>({
     resolver: zodResolver(schema as any) as Resolver<T>,
@@ -157,17 +159,29 @@ export default function ShadcnDynamicForm<T extends FieldValues>({
           </Button>
         </form>
       </Form>
-      {linkText && linkHref && (
-        <p className="text-center text-sm text-gray-600">
-          {linkText}{" "}
-          <Link
-            href={linkHref}
-            className="font-medium text-blue-600 hover:underline"
-          >
-            {linkHref.includes("sign-up") ? "Sign up" : "Sign in"}
-          </Link>
-        </p>
-      )}
+      <div className="space-y-2">
+        {linkText && linkHref && (
+          <p className="text-center text-sm text-gray-600">
+            {linkText}{" "}
+            <Link
+              href={linkHref}
+              className="font-medium text-blue-600 hover:underline"
+            >
+              {linkHref.includes("sign-up") ? "Sign up" : "Sign in"}
+            </Link>
+          </p>
+        )}
+        {additionalLinks?.map((link) => (
+          <p key={link.href} className="text-center text-sm text-gray-600">
+            <Link
+              href={link.href}
+              className="font-medium text-blue-600 hover:underline"
+            >
+              {link.text}
+            </Link>
+          </p>
+        ))}
+      </div>
     </div>
   );
 }

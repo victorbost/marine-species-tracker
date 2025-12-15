@@ -59,6 +59,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "core.urls"
 
+# Password reset settings
+PASSWORD_RESET_TIMEOUT = 259200  # 3 days in seconds
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",

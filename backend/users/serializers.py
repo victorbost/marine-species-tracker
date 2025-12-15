@@ -104,12 +104,8 @@ class PasswordResetRequestSerializer(serializers.Serializer):
     def save(self):
         user = self.user
         token = default_token_generator.make_token(user)
-        uid = base64.urlsafe_b64encode(force_bytes(str(user.pk))).decode(
-            "ascii"
-        )
-        pk_as_string = str(user.pk)
-        pk_as_bytes = force_bytes(pk_as_string)
-        uid = base64.urlsafe_b64encode(pk_as_bytes).decode("ascii")
+        # Use the same UID encoding as Django's built-in password reset
+        uid = base64.urlsafe_b64encode(force_bytes(user.pk)).decode("ascii")
 
         # --- Environment-specific domain logic ---
         if settings.DEBUG:
@@ -178,16 +174,32 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
                 "ascii"
             )
             user = User._default_manager.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
+        except (TypeError, ValueError, OverflowError):
+            # Log the invalid uidb64 for debugging
+            print(f"Invalid uidb64: {self.validated_data.get('uidb64')}")
+            raise serializers.ValidationError(
+                {"uidb64": "Invalid user ID in reset link."}
+            )
+        except User.DoesNotExist:
+            # Log the uid for debugging
+            print(f"User not found for uid: {uid}")
+            raise serializers.ValidationError({"uidb64": "User not found."})
 
-        if user is not None and default_token_generator.check_token(
+        token_valid = default_token_generator.check_token(
             user, self.validated_data["token"]
-        ):
+        )
+
+        if user is not None and token_valid:
             user.set_password(self.validated_data["new_password"])
             user.save()
             return user
         else:
+            # Log debugging info
+            print(
+                f"Token validation failed. User: {user}, Token:"
+                f" {self.validated_data.get('token')[:10]}..., Valid:"
+                f" {token_valid}"
+            )
             raise serializers.ValidationError(
                 {"token": "The reset link is invalid or has expired."}
             )

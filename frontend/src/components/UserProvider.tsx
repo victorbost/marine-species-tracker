@@ -54,14 +54,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setUser(data);
       } else {
         setUser(null);
-        if (pathname !== "/sign-in" && pathname !== "/sign-up") {
+        if (
+          pathname !== "/sign-in" &&
+          pathname !== "/sign-up" &&
+          pathname !== "/forgot-password" &&
+          !pathname.startsWith("/reset-password/")
+        ) {
           router.push("/sign-in");
         }
       }
     } catch (err) {
       console.error("me request failed", err); // eslint-disable-line no-console
       setUser(null);
-      if (pathname !== "/sign-in" && pathname !== "/sign-up") {
+      if (
+        pathname !== "/sign-in" &&
+        pathname !== "/sign-up" &&
+        pathname !== "/forgot-password" &&
+        !pathname.startsWith("/reset-password/")
+      ) {
         router.push("/sign-in");
       }
     } finally {
@@ -70,7 +80,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [pathname, router]);
 
   useEffect(() => {
-    if (pathname !== "/sign-in" && pathname !== "/sign-up") {
+    if (
+      pathname !== "/sign-in" &&
+      pathname !== "/sign-up" &&
+      pathname !== "/forgot-password" &&
+      !pathname.startsWith("/reset-password/")
+    ) {
       fetchUser();
     }
   }, [fetchUser, pathname]);
