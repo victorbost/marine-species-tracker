@@ -117,9 +117,6 @@ class UserProfileSerializer(UserSerializer):
     def get_observation_count(self, obj):
         return obj.observations.count()
 
-    def get_observation_count(self, obj):
-        return obj.observations.count()
-
 
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
     username = None

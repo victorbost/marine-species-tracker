@@ -223,17 +223,17 @@ if USE_S3:
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 # =============================================================================
-# AWS Simple Email Service (SES) Configuration
+# RE-SEND Configuration
 # =============================================================================
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "email-smtp.eu-west-3.amazonaws.com"
+EMAIL_HOST = "smtp.resend.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv("SES_EMAIL_HOST_USER_LOCAL")
-EMAIL_HOST_PASSWORD = os.getenv("SES_EMAIL_HOST_PASSWORD_LOCAL")
+EMAIL_HOST_USER = "resend"
+EMAIL_HOST_PASSWORD = os.getenv("RESEND_API")
 
 # The default 'From' address for all emails sent by Django (e.g., password resets)
-DEFAULT_FROM_EMAIL = "Kuroshio Lab Notifications <no-reply@kuroshio-lab.com>"
+DEFAULT_FROM_EMAIL = "Kuroshio Lab <no-reply@notifications.kuroshio-lab.com>"
 
 # The address for error messages sent to ADMINS (optional, can be same as above)
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
