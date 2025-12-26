@@ -211,7 +211,7 @@ The backend includes a complete password reset system that sends secure reset li
 
 #### Email Configuration
 
-- Uses AWS SES for production email sending (configured in `core/settings.py`)
+- Uses RESSEND for production email sending (configured in `core/settings.py`)
 - Includes both HTML and plain text email templates
 - Environment-specific domain configuration (localhost for development, production domain for live)
 - Email templates are located in `users/templates/users/`
