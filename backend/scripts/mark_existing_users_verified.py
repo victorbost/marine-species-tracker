@@ -3,6 +3,7 @@
 Script to mark all existing active users as email verified.
 Run with: python manage.py shell < scripts/mark_existing_users_verified.py
 """
+from users.models import User
 
 import os
 import sys
@@ -14,8 +15,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 # Configure Django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 django.setup()
-
-from users.models import User
 
 
 def mark_existing_users_verified():

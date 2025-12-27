@@ -1,5 +1,8 @@
 import pytest
 from rest_framework.test import APIClient
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 pytestmark = pytest.mark.django_db
 
@@ -13,24 +16,30 @@ def client():
 
 @pytest.fixture
 def auth_user(client):
+    reg_payload = {
+        "email": "geomap2@example.com",
+        "username": "geomapper2",
+        "password": "GeoMap$123",
+        "role": "hobbyist",
+    }
     reg_resp = client.post(
         "/api/v1/auth/register/",
-        {
-            "email": "geomap2@example.com",
-            "username": "geomapper2",
-            "password": "GeoMap$123",
-            "role": "hobbyist",
-        },
+        reg_payload,
         format="json",
     )
     assert reg_resp.status_code in (200, 201)
+
+    # Activate the user
+    user_obj = User.objects.get(email=reg_payload["email"])
+    user_obj.is_active = True
+    user_obj.email_verified = True
+    user_obj.save()
+
     token_resp = client.post(
         "/api/v1/auth/login/",
         {
             "email": "geomap2@example.com",
-            "username": "geomapper2",
             "password": "GeoMap$123",
-            "role": "hobbyist",
         },
         format="json",
     )
@@ -43,9 +52,9 @@ def auth_user(client):
 def make_observation(client, coords, notes=""):
     obs_url = "/api/v1/observations/"
     data = {
-        "species_name": "TestFish",
-        "observation_datetime": "2025-11-01T12:00:00Z",
-        "location_name": notes or "Test Water",
+        "speciesName": "TestFish",
+        "observationDatetime": "2025-11-01T12:00:00Z",
+        "locationName": notes or "Test Water",
         "temperature": 18.5,
         "visibility": 12,
         "notes": notes,

@@ -18,6 +18,11 @@ class ObservationAPITestCase(APITestCase):
             username="usertest",
             password="StrongPassword123",
         )
+        # Activate the user for login
+        self.user.is_active = True
+        self.user.email_verified = True
+        self.user.save()
+
         self.login_url = reverse("token_obtain_pair")
         self.observations_url = reverse("user-observations")
 
@@ -26,7 +31,6 @@ class ObservationAPITestCase(APITestCase):
             self.login_url,
             {
                 "email": "user@test.com",
-                "username": "usertest",
                 "password": "StrongPassword123",
             },
             format="json",
@@ -52,10 +56,10 @@ class ObservationAPITestCase(APITestCase):
     def test_create_observation(self):
         self.authenticate()
         data = {
-            "species_name": "Shark",
+            "speciesName": "Shark",
             "location": {"type": "Point", "coordinates": [52.505, 14.404]},
-            "observation_datetime": "2025-10-21T13:45:00Z",
-            "location_name": "Pacific Point",
+            "observationDatetime": "2025-10-21T13:45:00Z",
+            "locationName": "Pacific Point",
             "temperature": 20.5,
             "visibility": 10,
             "notes": "Saw dorsal fin.",
@@ -75,7 +79,7 @@ class ObservationAPITestCase(APITestCase):
             location=Point(4.56, 1.23),
             observation_datetime=datetime.datetime.now(datetime.timezone.utc),
             location_name="Deep Bay",
-            depth=100,
+            depth_min=100,
             temperature=3.5,
             visibility=25,
             notes="Big splash",
@@ -84,11 +88,11 @@ class ObservationAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         features = response.data["results"]["features"]
         self.assertEqual(len(features), 1)
-        self.assertEqual(features[0]["properties"]["species_name"], "Whale")
+        self.assertEqual(features[0]["properties"]["speciesName"], "Whale")
 
     def test_missing_required_fields_fails(self):
         self.authenticate()
-        data = {"species_name": "", "latitude": "", "longitude": ""}
+        data = {"speciesName": "", "latitude": "", "longitude": ""}
         response = self.client.post(self.observations_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -130,7 +134,7 @@ class ObservationAPITestCase(APITestCase):
             location=Point(0, 0),
             observation_datetime=datetime.datetime.now(datetime.timezone.utc),
             location_name="Blue Sea",
-            depth=15,
+            depth_min=15,
             temperature=21,
             visibility=30,
             notes="note",
