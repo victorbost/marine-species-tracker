@@ -1,5 +1,8 @@
 import pytest
 from rest_framework.test import APIClient
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 pytestmark = pytest.mark.django_db
 
@@ -13,38 +16,44 @@ def client():
 
 @pytest.fixture
 def auth_user(client):
+    reg_payload = {
+        "email": "geomap2@example.com",
+        "username": "geomapper2",
+        "password": "GeoMap$123",
+        "role": "hobbyist",
+    }
     reg_resp = client.post(
         "/api/v1/auth/register/",
-        {
-            "email": "geomap@example.com",
-            "username": "geomapper",
-            "password": "GeoMap$123",
-            "role": "hobbyist",
-        },
+        reg_payload,
         format="json",
     )
     assert reg_resp.status_code in (200, 201)
-    login_resp = client.post(
+
+    # Activate the user
+    user_obj = User.objects.get(email=reg_payload["email"])
+    user_obj.is_active = True
+    user_obj.email_verified = True
+    user_obj.save()
+
+    token_resp = client.post(
         "/api/v1/auth/login/",
         {
-            "email": "geomap@example.com",
-            "username": "geomapper",
+            "email": "geomap2@example.com",
             "password": "GeoMap$123",
-            "role": "hobbyist",
         },
         format="json",
     )
-    assert login_resp.status_code == 200
-    token = login_resp.data["access"]
+    assert token_resp.status_code == 200
+    token = token_resp.data["access"]
     client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
     return client
 
 
 def make_observation(client, location, notes=""):
     data = {
-        "species_name": "TestFish",
-        "observation_datetime": "2025-11-01T12:00:00Z",
-        "location_name": "Test Water",
+        "speciesName": "TestFish",
+        "observationDatetime": "2025-11-01T12:00:00Z",
+        "locationName": "Test Water",
         "temperature": 18.5,
         "visibility": 12,
         "notes": notes,

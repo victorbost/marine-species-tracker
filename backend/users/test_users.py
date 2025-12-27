@@ -1,5 +1,8 @@
 import pytest
 from rest_framework.test import APIClient
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 @pytest.mark.django_db
@@ -50,26 +53,50 @@ class TestUserAuth:
 
     def test_login_missing_field(self, client, register_user):
         # Login missing username: should return error
-        resp = client.post(
+        user_obj = User.objects.get(email=register_user["email"])
+        user_obj.is_active = True
+        user_obj.email_verified = True
+        user_obj.save()
+        # Test case 1: Login missing email - should return error for 'email' field
+        resp_missing_email = client.post(
             self.login_url,
             {
-                "email": "user@example.com",
                 "password": "testpassword123",
-                "role": "hobbyist",
+                # "email" is intentionally missing
             },
             format="json",
         )
-        assert resp.status_code == 400
-        assert "username" in resp.data
+        assert resp_missing_email.status_code == 400
+        assert "email" in resp_missing_email.data
+        assert "This field is required." in resp_missing_email.data["email"]
+
+        # Test case 2: Login missing password - should return error for 'password' field
+        resp_missing_password = client.post(
+            self.login_url,
+            {
+                "email": "user@example.com",
+                # "password" is intentionally missing
+            },
+            format="json",
+        )
+        assert resp_missing_password.status_code == 400
+        assert "password" in resp_missing_password.data
+        assert (
+            "This field is required." in resp_missing_password.data["password"]
+        )
 
     def test_login_invalid_username(self, client, register_user):
-        # Wrong username: should return "No active account found with the given credentials"
+        # Activate the user first
+        user_obj = User.objects.get(email=register_user["email"])
+        user_obj.is_active = True
+        user_obj.email_verified = True
+        user_obj.save()
         resp = client.post(
             self.login_url,
             {
                 "username": "lol",
                 "email": "user@example.com",
-                "password": "testpassword123",
+                "password": "wrongpassword",
                 "role": "hobbyist",
             },
             format="json",
@@ -79,6 +106,11 @@ class TestUserAuth:
 
     def test_login_success(self, client, register_user):
         # Right username, email, password: should return refresh & access
+        user_obj = User.objects.get(email=register_user["email"])
+        user_obj.is_active = True
+        user_obj.email_verified = True
+        user_obj.save()
+
         resp = client.post(
             self.login_url,
             {
@@ -95,6 +127,11 @@ class TestUserAuth:
 
     def test_patch_user(self, client, register_user):
         # Update user username with PATCH and Bearer token
+        user_obj = User.objects.get(email=register_user["email"])
+        user_obj.is_active = True
+        user_obj.email_verified = True
+        user_obj.save()
+
         resp = client.post(
             self.login_url,
             {
@@ -130,6 +167,11 @@ class TestUserAuth:
 
     def test_refresh_token(self, client, register_user):
         # Login first
+        user_obj = User.objects.get(email=register_user["email"])
+        user_obj.is_active = True
+        user_obj.email_verified = True
+        user_obj.save()
+
         resp = client.post(
             self.login_url,
             {
@@ -165,10 +207,10 @@ class TestUserAuth:
         """
         obs_url = "/api/v1/observations/"
         payload = {
-            "species_name": "Test Fish",
-            "observation_datetime": "2024-10-29T12:00:00Z",
+            "speciesName": "Test Fish",
+            "observationDatetime": "2024-10-29T12:00:00Z",
             "location": "POINT(1.0 2.0)",
-            "location_name": "Test Reef",
+            "locationName": "Test Reef",
             "temperature": 20.2,
             "visibility": 15.1,
             "notes": "Test observation note",
@@ -185,13 +227,17 @@ class TestUserAuth:
         assert resp.status_code in (401, 403)
 
     def test_profile_me_no_observations(self, client, register_user):
+        # Activate the user first
+        user_obj = User.objects.get(email=register_user["email"])
+        user_obj.is_active = True
+        user_obj.email_verified = True
+        user_obj.save()
+
         login = client.post(
             self.login_url,
             {
-                "username": "diverbob",
                 "email": "user@example.com",
                 "password": "testpassword123",
-                "role": "hobbyist",
             },
             format="json",
         )
@@ -207,13 +253,17 @@ class TestUserAuth:
         assert features == []
 
     def test_profile_me_with_observations(self, client, register_user):
+        # Activate the user first
+        user_obj = User.objects.get(email=register_user["email"])
+        user_obj.is_active = True
+        user_obj.email_verified = True
+        user_obj.save()
+
         login = client.post(
             self.login_url,
             {
-                "username": "diverbob",
                 "email": "user@example.com",
                 "password": "testpassword123",
-                "role": "hobbyist",
             },
             format="json",
         )
@@ -226,31 +276,35 @@ class TestUserAuth:
         features = data["observations"]["features"]
         assert len(features) == 1
         obs_props = features[0]["properties"]
-        assert obs_props["species_name"] == "Test Fish"
-        assert obs_props["location_name"] == "Test Reef"
+        assert obs_props["speciesName"] == "Test Fish"
+        assert obs_props["locationName"] == "Test Reef"
 
     def test_profile_me_multiple_observations(self, client, register_user):
+        # Activate the user first
+        user_obj = User.objects.get(email=register_user["email"])
+        user_obj.is_active = True
+        user_obj.email_verified = True
+        user_obj.save()
+
         login = client.post(
             self.login_url,
             {
-                "username": "diverbob",
                 "email": "user@example.com",
                 "password": "testpassword123",
-                "role": "hobbyist",
             },
             format="json",
         )
         token = login.data["access"]
         self.create_observation_for_user(client, token)
         self.create_observation_for_user(
-            client, token, payload_override={"species_name": "Shark"}
+            client, token, payload_override={"speciesName": "Shark"}
         )
         resp = client.get(self.profile_me_url)
         assert resp.status_code == 200
         data = resp.json()
         assert data["observation_count"] == 2
         features = data["observations"]["features"]
-        observed_species = [f["properties"]["species_name"] for f in features]
+        observed_species = [f["properties"]["speciesName"] for f in features]
         assert "Test Fish" in observed_species
         assert "Shark" in observed_species
 
@@ -279,7 +333,6 @@ class TestUserAuth:
         from django.utils.encoding import force_bytes
 
         # Get user and generate valid token/uid
-        user = register_user  # The register_user fixture creates a user
         # Actually need to get the User model instance
         from django.contrib.auth import get_user_model
 
@@ -343,7 +396,8 @@ class TestUserAuth:
             self.password_reset_confirm_url, payload, format="json"
         )
         assert resp.status_code == 400
-        assert "token" in resp.data
+        assert "uidb64" in resp.data
+        assert "Invalid user ID in reset link." in resp.data["uidb64"]
 
     def test_password_reset_confirm_mismatched_passwords(
         self, client, register_user
